@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UXSpace</title>
+<style>
+:root{--bg:#eef1f4;--panel:#fff;--fg:#1d2733;--mut:#5d6b7a;--bd:#c5cdd6;--ac:#1f5fbf;--card:#fff;--note:#fff4c2;--noteb:#d4b02a;--notef:#4d3d00;--code:#f7f9fb;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a24;--panel:#1a2432;--fg:#e4eaf1;--mut:#93a1b2;--bd:#34445a;--ac:#6aa3f5;--card:#223044;--note:#3d3410;--noteb:#a38a1f;--notef:#f2dd8a;--code:#16202d}}
+:root[data-theme="dark"]{--bg:#121a24;--panel:#1a2432;--fg:#e4eaf1;--mut:#93a1b2;--bd:#34445a;--ac:#6aa3f5;--card:#223044;--note:#3d3410;--noteb:#a38a1f;--notef:#f2dd8a;--code:#16202d}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+[hidden]{display:none!important}
+header{padding:14px 16px 0}
+h1{font-size:20px;margin:0 0 2px;letter-spacing:-.01em}
+header p{margin:0;color:var(--mut);font-size:14px}
+nav.tabs{display:flex;gap:4px;padding:12px 16px 0;border-bottom:1px solid var(--bd);overflow-x:auto}
+nav.tabs button{font:inherit;font-weight:600;background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);padding:8px 12px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--ac)}
+main{padding:16px}
+.split{display:grid;grid-template-columns:minmax(340px,5fr) 7fr;gap:16px;align-items:start}
+@media(max-width:899px){.split{grid-template-columns:1fr}}
+.split>*{min-width:0}
+.sticky{position:sticky;top:8px}
+.sticky #stage{max-height:calc(100vh - 170px);overflow:auto}
+.wf .screen.wide{max-width:none}
+.wf .screen:not(.wide) .inline,.wf .screen:not(.wide) .nav{flex-direction:column;align-items:stretch}
+.wf .screen:not(.wide) .columns{grid-template-columns:1fr!important}
+.wf .screen:not(.wide) .st{flex-basis:auto}
+.fgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px}
+.fgrid label{display:flex;flex-direction:column;font-size:13px;color:var(--mut);gap:3px;min-width:0}
+.fgrid select,.fgrid input{width:100%;text-overflow:ellipsis}
+.formp .bar select{max-width:100%;text-overflow:ellipsis}
+.fgrid select,.fgrid input,.formp .bar input,.formp .bar select{font:inherit;font-size:15px;padding:7px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg);min-width:0}
+.formp .bar{margin:10px 0 0}
+.formp fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0 0;padding:4px 12px 12px;background:var(--panel)}
+.formp legend{font-weight:700;padding:0 6px}
+#stage .sel{outline:2px solid var(--ac);outline-offset:2px}
+#flowstart,#flowdepth{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg)}
+#tut{border:2px solid var(--ac);border-radius:10px;padding:12px;margin:0 0 12px;background:var(--panel)}
+#tut h3{margin:0 0 4px;font-size:16px}
+#tut p{margin:4px 0 8px;color:var(--mut)}
+#tut p.ok{color:var(--ac);font-weight:600}
+.sticky .bar select{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg)}
+.ed{position:relative;background:var(--code);border-radius:8px;margin-top:14px}
+.vsep{width:1px;height:22px;background:var(--bd);margin:0 6px}
+#back{font-size:18px;line-height:1;padding:5px 12px}
+.ed textarea#src{display:block;position:relative;background:transparent}
+#hl{position:absolute;inset:0;padding:12px;border:1px solid transparent;overflow:hidden;white-space:pre-wrap;overflow-wrap:break-word;color:transparent;font:16px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2;pointer-events:none;box-sizing:border-box}
+#hl mark{background:rgba(255,196,0,.4);color:transparent;border-radius:2px}
+.ed textarea#src,#hl{scrollbar-gutter:stable}
+textarea,pre{font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+textarea#src{width:100%;min-height:42vh;resize:vertical;background:var(--code);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:12px;font-size:16px;tab-size:2}
+textarea#out{width:100%;min-height:50vh;background:var(--code);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:12px}
+details{margin:12px 0;background:var(--panel);border:1px solid var(--bd);border-radius:8px;padding:8px 12px}
+summary{cursor:pointer;font-weight:600}
+details pre{white-space:pre-wrap;margin:8px 0 0;color:var(--mut)}
+#errs{margin:10px 0 0;padding:0;list-style:none;color:#b3261e;font-size:14px}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) #errs{color:#ff9a92}}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.chip,.act{font:inherit;font-size:14px;border:1px solid var(--bd);background:var(--panel);color:var(--fg);border-radius:999px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:#fff}
+.act{border-radius:8px;font-weight:600}
+.bar label{font-size:14px;color:var(--mut);margin-left:auto}
+.cap{text-align:center;color:var(--mut);font-size:13px;margin-bottom:6px}
+#flow{overflow-x:auto;background:var(--panel);border:1px solid var(--bd);border-radius:8px;padding:12px}
+#flow svg{max-width:100%;height:auto}
+#flowsrc{margin-top:12px;background:var(--code);border:1px solid var(--bd);border-radius:8px;padding:12px;overflow-x:auto}
+/* wireframe styles, shared with the exported HTML */
+.wf{font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--fg,#1d2733)}
+.wf .screen{max-width:420px;margin:0 auto;background:var(--card,#fff);border:1px solid var(--bd,#c5cdd6);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.wf .screen[hidden]{display:none}
+.wf h3{margin:0;font-size:18px}
+.wf p{margin:0;color:var(--mut,#5d6b7a)}
+.wf .f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut,#5d6b7a)}
+.wf input[type=text],.wf input[type=email],.wf input[type=password],.wf input[type=number],.wf input[type=search],.wf input[type=tel],.wf select{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--bd,#c5cdd6);border-radius:6px;background:transparent;color:inherit;width:100%}
+.wf .c{display:flex;gap:8px;align-items:center}
+.wf .b{font:inherit;font-weight:600;padding:10px 14px;border:1px solid var(--fg,#1d2733);background:var(--fg,#1d2733);color:var(--card,#fff);border-radius:6px;cursor:pointer}
+.wf .b.s{background:transparent;color:var(--fg,#1d2733)}
+.wf .l{color:var(--ac,#1f5fbf);text-decoration:underline;font-size:14px}
+.wf .img{min-height:110px;border:1px dashed var(--bd,#c5cdd6);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--mut,#5d6b7a);background:repeating-linear-gradient(135deg,transparent 0 10px,rgba(128,128,128,.12) 10px 11px)}
+.wf hr{border:0;border-top:1px solid var(--bd,#c5cdd6);width:100%;margin:0}
+.wf .card{border:1px solid var(--bd,#c5cdd6);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.wf .column,.wf .form{display:flex;flex-direction:column;gap:10px}
+.wf .nav,.wf .inline{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.wf .section{display:flex;flex-direction:column;gap:12px;border:1px solid var(--bd,#c5cdd6);border-radius:8px;padding:12px}
+.wf .columns{display:grid;gap:12px}
+.wf .columns>*{min-width:0}
+.wf .columns>.column{border:1px dashed var(--bd,#c5cdd6);border-radius:6px;padding:8px}
+.wf .st{flex-basis:100%;font-weight:600;font-size:13px;color:var(--mut,#5d6b7a)}
+.wf .modal{border:1px solid var(--fg,#1d2733);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);background:var(--card,#fff)}
+.wf table{width:100%;border-collapse:collapse;font-size:14px}
+.wf caption{text-align:left;font-weight:600;padding-bottom:6px}
+.wf th,.wf td{border:1px solid var(--bd,#c5cdd6);padding:6px 8px;text-align:left}
+.wf th{background:rgba(128,128,128,.12)}
+.wf td{color:var(--mut,#5d6b7a)}
+.wf .wtabs{display:flex;border-bottom:1px solid var(--bd,#c5cdd6)}
+.wf .wtabs button{font:inherit;background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px;cursor:pointer;color:var(--mut,#5d6b7a)}
+.wf .wtabs button.on{color:var(--fg,#1d2733);border-bottom-color:var(--ac,#1f5fbf);font-weight:600}
+.wf .nav{padding-bottom:10px;border-bottom:1px solid var(--bd,#c5cdd6);justify-content:space-between}
+
+.wf .note{background:var(--note,#fff4c2);border-left:3px solid var(--noteb,#d4b02a);color:var(--notef,#4d3d00);padding:6px 10px;font-size:13px;border-radius:0 4px 4px 0}
+.wf .unk{color:#b3261e;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+<h1>UXSpace</h1>
+<p>Describe screens in text. Preview them, click through, then export for an AI.</p>
+<div class="bar" style="margin:8px 0 0"><input id="pname" type="text" placeholder="Project name" aria-label="Project name" style="font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg);min-width:0;width:min(260px,100%)"><button class="act" id="sample">Load sample</button><button class="act" id="tutload">Load tutorial</button><button class="act" id="clear">Clear</button></div>
+</header>
+<nav class="tabs" role="tablist">
+<button data-t="build" aria-selected="true">Build</button>
+<button data-t="flow" aria-selected="false">Flow</button>
+<button data-t="exp" aria-selected="false">Export</button>
+</nav>
+<main>
+<div class="split" data-pane="build">
+<section>
+<div id="tut" hidden></div>
+<div class="formp"><fieldset><legend>Add</legend>
+<div class="fgrid">
+<label>Within screen<select id="fs"></select></label>
+<label>Inside<select id="fc"></select></label>
+<label>Element<select id="ft"><optgroup label="Content"><option value="heading">Heading</option><option value="text">Text</option><option value="paragraph">Paragraph (Lorem ipsum)</option><option value="image">Image</option><option value="divider">Divider</option><option value="table">Table</option></optgroup><optgroup label="Form controls"><option value="input">Input</option><option value="select">Select</option><option value="checkbox">Checkbox</option></optgroup><optgroup label="Actions"><option value="button">Button</option><option value="link">Link</option><option value="tabs">Tabs</option></optgroup><optgroup label="Layout"><option value="section">Section (full-width band)</option><option value="columns">Columns (side by side, stack on mobile)</option><option value="column">Column (one column inside Columns)</option><option value="card">Card (bordered box)</option><option value="inline">Inline group (side by side, no box)</option></optgroup><optgroup label="Special"><option value="form">Form</option><option value="nav">Nav</option><option value="modal">Modal</option></optgroup><optgroup label="Reuse and notes"><option value="use">Use shared component</option><option value="note">Note</option></optgroup></select></label>
+<label><span id="fll">Label</span><input id="fl" type="text"><select id="fls" hidden></select></label>
+<label>Goes to<select id="fto" disabled></select></label>
+<label><span id="fxl">Extra</span><input id="fx" type="text" placeholder="(optional)"><select id="fly" hidden><option value="1:1">2 equal columns</option><option value="1:1:1">3 equal columns</option><option value="1:1:1:1">4 equal columns</option><option value="2:1">Main + sidebar (2:1)</option><option value="3:1">Main + narrow sidebar (3:1)</option><option value="1:2">Sidebar + main (1:2)</option><option value="1:3">Narrow sidebar + main (1:3)</option><option value="1:2:1">Sidebar + main + sidebar (1:2:1)</option></select></label>
+<label>Position<select id="fp"></select></label>
+</div>
+<div class="bar" id="newrow" hidden><input id="fns" type="text" placeholder="New screen name"><button class="act" id="fnew">Create</button></div>
+<div class="bar"><button class="act" id="fadd">Add element</button></div>
+</fieldset>
+<fieldset><legend>Edit</legend>
+<div class="bar"><select id="fm" aria-label="Element to move or delete"></select><button class="act" id="fup">Up</button><button class="act" id="fdn">Down</button><button class="act" id="fdel">Delete</button><button class="act" id="fundo">Undo</button></div>
+<div class="fgrid"><label>Label<input id="vl" type="text"></label><label>Goes to<select id="vto"></select></label><label><span id="vxl">Extra</span><select id="vly" hidden></select><input id="vx" type="text" hidden></label><div class="bar" style="align-items:end"><button class="act" id="vapply">Apply values</button></div></div>
+<div class="bar"><select id="fmt" aria-label="Move into"></select><button class="act" id="fmv">Move into</button></div>
+</fieldset></div>
+<div class="ed"><div id="hl" aria-hidden="true"></div><textarea id="src" spellcheck="false" aria-label="Wireframe spec"></textarea></div>
+<ul id="errs"></ul>
+<details><summary>Syntax guide</summary>
+<pre>screen "Name"        starts a screen (top level)
+Indent by 2 spaces to nest.
+# comment
+
+Reusable:   component "Name" (top level), then: use "Name" inside a screen
+Layout:     section "Title" (full-width band)
+            columns layout=2:1 (each child = one column; wraps)
+            column, card, inline (side by side, no box)
+Other:      form, nav, modal
+Elements:   heading "Text"   text "Text"   paragraph (Lorem ipsum, or give text)
+            input "Label" type=email id=email placeholder="…"
+            select "Label" options=One|Two|Three
+            checkbox "Label"   image "Caption"   divider
+            table "Title" cols=Name|Status|Due rows=3
+            tabs items=Overview|Tasks|Files
+            button "Label" -> "Screen"   (style=secondary)
+            link "Label" -> "Screen"
+            note "Why or how it should behave"
+
+-&gt; "Screen" makes any button or link navigate in the preview.
+Names and labels are always in quotes: -&gt; "Project details"
+Notes become requirements in the AI handoff.</pre></details>
+</section>
+
+<section class="sticky">
+<div class="bar"><button class="act" id="back" aria-label="Back" title="Back">←</button><div id="screens" style="display:contents"></div></div>
+<div class="bar"><button class="chip" data-d="mobile" aria-pressed="true">Mobile</button><button class="chip" data-d="wide" aria-pressed="false">Widescreen</button><span class="vsep" aria-hidden="true"></span><button class="chip" data-m="select" aria-pressed="true">Edit</button><button class="chip" data-m="play" aria-pressed="false">Run</button><label><input type="checkbox" id="shownotes" checked> Show notes</label></div>
+<div class="cap" id="cap"></div>
+<div class="wf" id="stage"></div>
+<div class="bar" style="margin:12px 0 0"><span>Save image of</span><select id="imgscope"><option value="cur">current screen</option><option value="all">all screens</option></select><select id="imgdir" hidden><option value="v">stacked vertically</option><option value="h">side by side</option></select><button class="act" id="png">Save PNG</button><button class="act" id="svg">Save SVG</button><span class="imgmsg"></span></div>
+</section>
+</div>
+
+<section data-pane="flow" hidden>
+<div class="bar"><label style="margin-left:0">Start from <select id="flowstart"></select></label><select id="flowdepth" hidden><option value="1">1 level</option><option value="2" selected>2 levels</option><option value="3">3 levels</option><option value="all">all levels</option></select><label style="margin-left:0"><input type="checkbox" id="flowshared"> Show shared links on every screen</label><button class="act" id="fpng">Save PNG</button><button class="act" id="fsvg">Save SVG</button><span class="imgmsg"></span></div>
+<div id="flow"></div>
+<pre id="flowsrc"></pre>
+</section>
+
+<section data-pane="exp" hidden>
+<div class="bar">
+<button class="chip" data-x="ai" aria-pressed="true">AI handoff</button>
+<button class="chip" data-x="html" aria-pressed="false">HTML wireframe for testing</button>
+<button class="chip" data-x="spec" aria-pressed="false">Spec only</button>
+<button class="act" id="dl" style="margin-left:auto">Download</button><button class="act" id="copy">Copy</button><span class="imgmsg"></span>
+</div>
+<div class="fgrid" id="aiopts" style="margin:0 0 12px"><label>Build target<select id="aitarget"><option value="demo">Demo: HTML/CSS/JS with sample content and stock images</option><option value="starter">Starter: empty HTML/CSS/JS files</option><option value="php">PHP + MySQL project files</option><option value="fw">Framework project files</option></select></label><label id="fwrow" hidden>Framework<select id="aifw"><option>React</option><option>Next.js</option><option>Vue</option><option>Nuxt</option><option>Angular</option><option>SvelteKit</option><option>Laravel</option><option>Django</option><option>Ruby on Rails</option></select></label><label style="flex-direction:row;align-items:center;gap:6px;color:var(--fg)"><input type="checkbox" id="airef" style="width:auto"> Include reference wireframe HTML</label><label style="grid-column:1/-1">Reference URLs for the design (optional, one per line)<textarea id="airefs" rows="2" placeholder="https://example.com" style="font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg);width:100%;min-width:0;padding:7px 8px"></textarea></label></div>
+<textarea id="out" readonly spellcheck="false" aria-label="Export"></textarea>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const SAMPLE=`# Lines starting with # are comments.
+# A shared component is defined once, then reused with "use".
+component "Top nav"
+  nav
+    text "Projectspace"
+    link "Home" -> "Home"
+    link "Projects" -> "Projects"
+    link "Sign out" -> "Login"
+
+screen "Home"
+  use "Top nav"
+  section "Welcome"
+    heading "Plan work together"
+    paragraph
+    image "Hero illustration"
+    inline
+      button "Get started" -> "Login"
+      button "View projects" style=secondary -> "Projects"
+  section "Why Projectspace"
+    columns layout=1:1:1
+      card
+        heading "Plan"
+        text "Break work into projects."
+      card
+        heading "Track"
+        text "See progress at a glance."
+      card
+        heading "Share"
+        text "Keep everyone in step."
+
+screen "Login"
+  card
+    heading "Welcome back"
+    form
+      input "Email" type=email id=email
+      input "Password" type=password
+      checkbox "Keep me signed in"
+      button "Sign in" -> "Projects"
+    link "Continue as guest" -> "Projects"
+    note "Lock the account after 5 failed attempts"
+
+screen "Projects"
+  use "Top nav"
+  heading "Your projects"
+  section "Filters"
+    inline
+      select "Status" options=All|Planning|In progress|Done
+      input "Search" type=search
+  columns layout=1:1
+    card
+      image "Project thumbnail"
+      heading "Website redesign"
+      text "Due 12 Dec"
+      button "Open" -> "Project details"
+    card
+      heading "Mobile app"
+      text "Due 20 Jan"
+      button "Open" -> "Project details"
+  divider
+  button "New project" -> "Project details"
+  note "Show only projects the user can access"
+
+screen "Project details"
+  use "Top nav"
+  heading "Website redesign"
+  tabs items=Overview|Tasks|Files
+  columns layout=2:1
+    column
+      image "Gantt chart"
+      table "Tasks" cols=Task|Owner|Due rows=3
+    column
+      card
+        heading "Details"
+        text "Owner: Sam"
+        text "Due: 12 Dec"
+      section "Actions"
+        button "Save changes" -> "Projects"
+        button "Delete project" style=secondary
+  modal "Delete this project?"
+    text "This cannot be undone."
+    inline
+      button "Delete" -> "Projects"
+      button "Cancel" style=secondary
+  note "Tabs only show the layout here; each would switch content"
+`;
+const WFCSS=[...document.styleSheets[0].cssRules].map(r=>r.cssText).filter(t=>t.startsWith('.wf')).join('\n');
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const F=String.fromCharCode(96).repeat(3);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const slug=s=>String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const TYPES=new Set(['screen','card','section','column','form','nav','columns','inline','modal','table','tabs','component','use','paragraph','heading','text','input','select','checkbox','image','divider','button','link','note']);
+const ta=$('#src');
+try{ta.value=localStorage.getItem('wfw-spec')||SAMPLE}catch(e){ta.value=SAMPLE}
+
+function parse(src){
+  const screens=[],comps=[],errs=[],stack=[];
+  src.replace(/\t/g,'  ').split('\n').forEach((raw,i)=>{
+    const line=raw.trim();
+    if(!line||line[0]==='#')return;
+    const ind=Math.floor(raw.match(/^ */)[0].length/2);
+    const n={type:'',label:'',attrs:{},to:'',children:[],line:i+1};
+    for(const t of line.matchAll(/"([^"]*)"|->\s*(?:"([^"]*)"|(\S+))|(\w+)=("[^"]*"|\S+)|(\S+)/g)){
+      if(t[1]!==undefined)n.label=t[1];
+      else if(t[2]!==undefined||t[3])n.to=t[2]??t[3];
+      else if(t[4])n.attrs[t[4]]=t[5].replace(/^"|"$/g,'');
+      else if(!n.type)n.type=t[6].toLowerCase();
+      else if(!n.label)n.label=t[6];
+    }
+    
+    if(n.type==='grid'){n.type='columns';n.attrs.layout=Array(+n.attrs.cols||2).fill(1).join(':');delete n.attrs.cols}
+    if(!TYPES.has(n.type))errs.push(`Line ${n.line}: unknown element “${n.type}”`);
+    if(n.type==='screen'||n.type==='component'){n.depth=0;stack.length=0;(n.type==='screen'?screens:comps).push(n);stack.push(n);return}
+    stack.length=Math.min(stack.length,Math.max(ind,1));
+    const p=stack[stack.length-1];
+    if(!p){errs.push(`Line ${n.line}: put this inside a screen`);return}
+    n.depth=stack.length;n.parent=p;p.children.push(n);stack.push(n);
+  });
+  COMPS=Object.fromEntries(comps.map(c=>[slug(c.label),c]));
+  const ids=new Set(screens.map(s=>slug(s.label)));
+  const walk=(n,s)=>{if(n.to&&!ids.has(slug(n.to)))errs.push(`Line ${n.line}: no screen called “${n.to}”`);if(n.type==='use'&&!COMPS[slug(n.label)])errs.push(`Line ${n.line}: no component called “${n.label}”`);n.children.forEach(c=>walk(c,s))};
+  [...screens,...comps].forEach(s=>walk(s,s));
+  return{screens,comps,errs};
+}
+
+let PV=false;
+function R(n,notes){const h=R0(n,notes);return PV&&h&&n.type!=='use'?h.replace(/^<(\w+)/,'<$1 data-l="'+n.line+'"'):h}
+function R0(n,notes){
+  const to=n.to?` data-to="${esc(slug(n.to))}"`:'';
+  const kids=()=>n.children.map(c=>R(c,notes)).join('');
+  const a=n.attrs;
+  switch(n.type){
+    case 'heading':return `<h3>${esc(n.label)}</h3>`;
+    case 'paragraph':return `<p>${esc(n.label||LOREM)}</p>`;
+    case 'text':return `<p>${esc(n.label)}</p>`;
+    case 'input':return `<label class="f"><span>${esc(n.label)}</span><input type="${esc(a.type||'text')}" placeholder="${esc(a.placeholder||'')}"${a.id?` id="${esc(a.id)}"`:''}></label>`;
+    case 'button':return `<button class="b${a.style==='secondary'?' s':''}"${to}>${esc(n.label)}</button>`;
+    case 'link':return `<a class="l" href="#"${to}>${esc(n.label)}</a>`;
+    case 'checkbox':return `<label class="c"><input type="checkbox"> ${esc(n.label)}</label>`;
+    case 'select':return `<label class="f"><span>${esc(n.label)}</span><select>${(a.options||'').split('|').map(o=>`<option>${esc(o)}</option>`).join('')}</select></label>`;
+    case 'image':return `<div class="img">${esc(n.label||'Image')}</div>`;
+    case 'divider':return '<hr>';
+    case 'note':return notes?`<div class="note">${esc(n.label)}</div>`:'';
+    case 'section':return `<div class="section">${n.label?`<div class="st">${esc(n.label)}</div>`:''}${kids()}</div>`;
+    case 'use':return(COMPS[slug(n.label)]||{children:[]}).children.map(c=>R(c,notes)).join('');
+    case 'modal':return `<div class="modal"><div class="st">${esc(n.label||'Modal')}</div>${kids()}</div>`;
+    case 'table':{const cs=(a.cols||'Column 1|Column 2').split('|'),rn=+a.rows||3;return `<table>${n.label?`<caption>${esc(n.label)}</caption>`:''}<tr>${cs.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>${Array.from({length:rn},()=>`<tr>${cs.map(()=>'<td>Text</td>').join('')}</tr>`).join('')}</table>`}
+    case 'tabs':return `<div class="wtabs">${(a.items||'Tab 1|Tab 2').split('|').map((t,i)=>`<button class="${i?'':'on'}">${esc(t)}</button>`).join('')}</div>`;
+    case 'column':case 'card':case 'nav':case 'form':case 'inline':return `<div class="${n.type}">${kids()}</div>`;
+    case 'columns':{const r=(a.layout||'1:1').split(':').map(x=>+x>0?+x:1);return `<div class="columns" style="grid-template-columns:${r.map(x=>x+'fr').join(' ')}">${kids()}</div>`}
+    default:return `<div class="unk">Unknown: ${esc(n.type)}</div>`;
+  }
+}
+
+let data=parse(ta.value),cur='',hist=[],T='build',X='ai',D='mobile';
+const refresh=()=>{
+  data=parse(ta.value);
+  $('#errs').innerHTML=data.errs.map(e=>`<li>${esc(e)}</li>`).join('');
+  try{localStorage.setItem('wfw-spec',ta.value)}catch(e){}
+  fillForm();fillMore();if(T==='build')showPrev();renderTut();
+};
+ta.addEventListener('input',refresh);
+ta.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const s=ta.selectionStart;ta.setRangeText('  ',s,ta.selectionEnd,'end')}});
+
+function tab(t){
+  T=t;refresh();
+  $$('[data-pane]').forEach(p=>p.hidden=p.dataset.pane!==t);
+  $$('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));
+  if(t==='flow')showFlow();if(t==='exp')showExp();
+}
+$$('nav.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+
+function go(id,push=true){
+  if(push&&cur)hist.push(cur);
+  cur=id;showPrev();syncToScreen();
+}
+function showPrev(){
+  const ss=data.screens;
+  if(!ss.length){$('#stage').innerHTML='<p>Add a “screen” line in the Write tab.</p>';$('#screens').innerHTML='';return}
+  if(!ss.some(s=>slug(s.label)===cur))cur=slug(ss[0].label);
+  $('#screens').innerHTML=ss.map(s=>`<button class="chip" aria-pressed="${slug(s.label)===cur}" data-id="${slug(s.label)}">${esc(s.label)}</button>`).join('');
+  $$('#screens .chip').forEach(c=>c.onclick=()=>go(c.dataset.id));
+  const s=ss.find(s=>slug(s.label)===cur);
+  $('#cap').textContent=s.label;
+  $('#stage').innerHTML=`<div class="screen${D==='wide'?' wide':''}">${(PV=true,s.children.map(c=>R(c,$('#shownotes').checked)).join('')+(PV=false,''))}</div>`;hilite();
+}
+$('#stage').addEventListener('click',e=>{
+  const t=e.target.closest('[data-to]');
+  if(M==='play'&&t){e.preventDefault();go(t.dataset.to)}else if(e.target.closest('a'))e.preventDefault();
+});
+$('#back').onclick=()=>{if(hist.length)go(hist.pop(),false)};
+$('#shownotes').onchange=showPrev;
+
+function edges(){
+  const out=[],seen=new Set(),ss=data.screens,idx=new Map(ss.map((s,i)=>[slug(s.label),i]));
+  ss.forEach((s,i)=>{
+    const walk=n=>{
+      if(n.to&&idx.has(slug(n.to))){
+        const k=`${i}|${n.label}|${n.to}`;
+        if(!seen.has(k)){seen.add(k);out.push({from:i,label:n.label,to:idx.get(slug(n.to))})}
+      }
+      (n.type==='use'?(COMPS[slug(n.label)]||n).children:n.children).forEach(walk);
+    };
+    s.children.forEach(walk);
+  });
+  return out;
+}
+const q=s=>String(s).replace(/"/g,"'");
+function walkTree(n,fn,expand,inC,seen){
+  fn(n,inC);
+  if(n.type==='use'){const c=COMPS[slug(n.label)];if(expand&&c&&!seen.has(c)){seen.add(c);c.children.forEach(k=>walkTree(k,fn,expand,true,seen))}return}
+  n.children.forEach(k=>walkTree(k,fn,expand,inC,seen));
+}
+function flowCode(){
+  const ss=data.screens,cs=data.comps,all=$('#flowshared').checked;
+  const si=new Map(ss.map((s,i)=>[slug(s.label),i])),ci=new Map(cs.map((c,i)=>[slug(c.label),i]));
+  const E=new Map(),add=(a,b,l,dot)=>{if(a===b)return;const k=a+'>'+b+(dot?'.':'');if(!E.has(k))E.set(k,{a,b,dot,l:new Set()});E.get(k).l.add(l||'link')};
+  const usedBy=ss.map(()=>new Set());
+  ss.forEach((s,i)=>{
+    walkTree(s,n=>{if(n.type==='use'&&ci.has(slug(n.label)))usedBy[i].add(ci.get(slug(n.label)))},false,false,new Set());
+    walkTree(s,(n,inC)=>{if(n.to&&si.has(slug(n.to))&&(all||!inC))add('s'+i,'s'+si.get(slug(n.to)),n.label,inC)},all,false,new Set());
+  });
+  const cu=[...new Set(usedBy.flatMap(u=>[...u]))].sort((x,y)=>x-y);
+  if(!all)cu.forEach(j=>walkTree(cs[j],n=>{if(n.to&&si.has(slug(n.to)))add('c'+j,'s'+si.get(slug(n.to)),n.label,true)},true,false,new Set([cs[j]])));
+  const st=$('#flowstart').value,dep=$('#flowdepth').value==='all'?99:+$('#flowdepth').value,keep=new Set();
+  if(st&&si.has(slug(st))){
+    keep.add('s'+si.get(slug(st)));let fr=[...keep];
+    for(let d=0;d<dep&&fr.length;d++){const nx=[];E.forEach(e=>{if(e.a[0]==='s'&&fr.includes(e.a)&&!keep.has(e.b)){keep.add(e.b);nx.push(e.b)}});fr=nx}
+  }
+  const on=x=>!keep.size||keep.has(x);
+  const cshow=cu.filter(j=>ss.some((s,i)=>on('s'+i)&&usedBy[i].has(j)));
+  const L=['flowchart TB'];
+  if(!all&&cshow.length)L.push('  subgraph shared["Shared components"]',...cshow.map(j=>`    c${j}["${q(cs[j].label)}"]`),'  end');
+  ss.forEach((s,i)=>{if(!on('s'+i))return;const u=[...usedBy[i]].map(j=>cs[j].label);L.push(`  s${i}["${q(s.label)}${u.length&&!all?'<br/>uses: '+q(u.join(', ')):''}"]`)});
+  E.forEach(e=>{if((e.a[0]==='c'?cshow.includes(+e.a.slice(1)):on(e.a))&&on(e.b))L.push(`  ${e.a} ${e.dot?'-.->':'-->'}|"${q([...e.l].join(' / '))}"| ${e.b}`)});
+  L.push('  classDef shared fill:#e8eefc,stroke:#6b7fb3,stroke-dasharray:4 3,color:#1d2733');
+  if(!all&&cshow.length)L.push('  class '+cshow.map(j=>'c'+j).join(',')+' shared');
+  if(keep.size){L.push('  classDef start stroke:#1f5fbf,stroke-width:4px');L.push('  class s'+si.get(slug(st))+' start')}
+  return L.join('\n');
+}
+let fn=0;
+async function drawFlow(code,theme,plain){
+  mermaid.initialize({startOnLoad:false,theme,flowchart:{htmlLabels:!plain}});
+  return (await mermaid.render('wf'+(++fn),code)).svg;
+}
+async function showFlow(){
+  setOpts($('#flowstart'),'<option value="">All screens</option>'+data.screens.map(s=>`<option value="${esc(s.label)}">${esc(s.label)}</option>`).join(''));
+  $('#flowdepth').hidden=!$('#flowstart').value;
+  const code=flowCode(),box=$('#flow');
+  $('#flowsrc').textContent=code;
+  if(!data.screens.length){box.textContent='No screens yet.';return}
+  try{box.innerHTML=await drawFlow(code,matchMedia('(prefers-color-scheme: dark)').matches?'dark':'neutral')}
+  catch(e){box.textContent='The flow map could not be drawn. The Mermaid source is below.'}
+}
+async function flowFile(){
+  let svg=await drawFlow(flowCode(),'neutral',true);
+  const vb=(svg.match(/viewBox="([^"]+)"/)||[])[1],[x,y,w,h]=(vb||'0 0 800 600').split(/[\s,]+/).map(Number);
+  svg=svg.replace(/<svg[^>]*>/,m=>m.replace(/\swidth="[^"]*"/,'').replace(/\sheight="[^"]*"/,'').replace(/\sstyle="[^"]*"/,'').replace('<svg',`<svg width="${Math.ceil(w)}" height="${Math.ceil(h)}"`)+`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff"/>`);
+  return{svg,w:Math.ceil(w),h:Math.ceil(h)};
+}
+function svgToPng(svg,w,h){
+  return new Promise((res,rej)=>{
+    const im=new Image();
+    im.onload=()=>{const c=document.createElement('canvas');c.width=w*2;c.height=h*2;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);c.toBlob(res,'image/png')};
+    im.onerror=rej;im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  });
+}
+async function flowOut(kind){
+  try{say('Making image\u2026');const f=await flowFile();await saveFile(pf(kind==='png'?'flow.png':'flow.svg'),kind==='png'?await svgToPng(f.svg,f.w,f.h):f.svg)}
+  catch(e){say('Could not make the image.')}
+}
+$('#flowshared').addEventListener('change',showFlow);
+['#flowstart','#flowdepth'].forEach(id=>$(id).addEventListener('change',showFlow));
+$('#fpng').onclick=()=>flowOut('png');
+$('#fsvg').onclick=()=>flowOut('svg');
+function specText(){return ta.value.trim()+'\n'}
+function htmlText(){
+  const ss=data.screens;
+  const body=ss.map((s,i)=>`<section class="screen" id="${slug(s.label)}"${i?' hidden':''}>\n${s.children.map(c=>R(c,false)).join('\n')}\n</section>`).join('\n');
+  const js=`const show=id=>{document.querySelectorAll('section').forEach(s=>s.hidden=s.id!==id);scrollTo(0,0)};\ndocument.addEventListener('click',e=>{const t=e.target.closest('[data-to]');if(t){e.preventDefault();show(t.dataset.to)}const b=e.target.closest('.wtabs button');if(b)b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));});`;
+  return `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${esc(pn())}</title>\n<style>\nbody{margin:0;padding:16px}\n${WFCSS}\n</style>\n</head>\n<body class="wf">\n${body}\n<script>\n${js}\n<\/script>\n</body>\n</html>\n`;
+}
+const FWH={'React':'Vite + React + React Router; src/pages and src/components','Next.js':'App Router; app/<route>/page.tsx and a components/ folder','Vue':'Vite + Vue 3 + Vue Router; src/views and src/components','Nuxt':'Nuxt 3; pages/, components/ and layouts/','Angular':'standalone components + the Angular router; one component per screen','SvelteKit':'src/routes/<route>/+page.svelte and src/lib/components','Laravel':'Blade views in resources/views, Blade components in resources/views/components, routes in routes/web.php','Django':'templates/ with a base template and includes, urls.py and views.py','Ruby on Rails':'views with partials in app/views/shared, routes.rb, one controller action per screen'};
+const TG={
+  demo:{goal:'Build a clickable demo of this interface in plain HTML, CSS and JavaScript only (no build step, no libraries). Fill it with realistic dummy content, and use stock photos matched to each image element’s label so the wireframe comes to life.',
+    files:['index.html (the first screen) and one HTML file per other screen','css/styles.css (design tokens, layout, components)','js/components.js (shared components, rendered from one definition)','js/app.js (interactions only)'],
+    extra:['Use royalty-free stock photo URLs matched to each image label, with descriptive alt text and a neutral fallback if an image fails to load.','Forms validate in the browser only and show a plausible success state instead of posting anywhere.','It must work by simply opening index.html.']},
+  starter:{goal:'Create an empty but well-structured starter for a production build in plain HTML, CSS and JavaScript. Do not invent content: use clear placeholders and TODO comments.',
+    files:['One HTML file per screen with semantic markup and the right classes, but placeholder text only','css/ with base, layout and component stylesheets (tokens, responsive grid, utilities)','partials/ with one file per shared component, plus a small loader in js/include.js','js/ with empty, commented modules for the interactions described in the notes'],
+    extra:['No dummy copy and no stock images: use labelled placeholders (an image becomes a sized, labelled box).']},
+  php:{goal:'Create the skeleton of a PHP 8 + MySQL project for this interface, ready for a developer to extend.',
+    files:['One PHP page per screen','includes/ with a PHP partial for each shared component, plus header.php and footer.php','config.php (outside the web root if possible) and db.php (a PDO connection)','schema.sql with tables inferred from the data hints below','assets/css and assets/js'],
+    extra:['Use PDO prepared statements, escape all output and add CSRF tokens to forms. If there is a login screen, add a simple session-based login stub.','Keep logic out of templates and leave clear TODOs where real logic belongs.']}
+};
+function aiText(){
+  const ss=data.screens,cs=data.comps,tg=$('#aitarget').value,fw=$('#aifw').value,fl=flat();
+  const top=k=>{while(k.parent)k=k.parent;return k};
+  const tn=k=>{k=top(k);return k.type==='component'?'shared component “'+k.label+'”':k.label};
+  const used=new Set(fl.map(k=>k.type)),ext=tg==='php'?'.php':'.html';
+  const file=(s,i)=>tg==='fw'?(i?'/'+slug(s.label):'/'):(i?slug(s.label):'index')+ext;
+  const T=tg==='fw'?{goal:`Create a ${fw} project for this interface, ready for a developer to extend.`,files:['Project structure following this convention: '+FWH[fw],'One route or page per screen','One reusable component per shared component, and for any repeated pattern','Plain CSS or CSS modules; no UI library unless I ask for one','Navigation through the framework’s router'],extra:['Write idiomatic '+fw+' code, using types where the framework normally does.']}:TG[tg];
+  const nav=ss.map((s,i)=>{const t=edges().filter(e=>e.from===i).map(e=>`${ss[e.to].label} (“${e.label||'link'}”)`);return `- ${s.label} → ${file(s,i)}: ${t.length?'links to '+t.join(', '):'no outgoing links'}`}).join('\n');
+  const shared=cs.length?cs.map(c=>{const u=[...new Set(fl.filter(k=>k.type==='use'&&slug(k.label)===slug(c.label)).map(tn))];return `- [ ] ${c.label}: define once, reuse on ${u.length?u.join(', '):'(not used yet)'}`}).join('\n'):'- None defined';
+  const shHow={demo:'Define each in js/components.js and render it into a placeholder element, so there is one source of truth.',starter:'Put each in partials/ and load it with js/include.js, so there is one source of truth.',php:'Put each in includes/ as a PHP partial and require it wherever it is used.',fw:'Make each a reusable component in the framework’s shared components folder and import it wherever it is used.'}[tg];
+  const notes=fl.filter(k=>k.type==='note').map(k=>`- [ ] ${tn(k)}: ${k.label}`);
+  const generic=['- [ ] Every link and button in the navigation list works','- [ ] No horizontal page scrolling at 360 px wide','- [ ] Every form control has a visible, associated label','- [ ] Keyboard and screen-reader friendly (landmarks, focus states, alt text)','- [ ] Shared components exist once and are reused, not copied'];
+  const resp=['Responsive and mobile first: check 360, 768 and 1280 px wide.',
+    used.has('section')&&'section: a full-width block that stacks its contents; keep its title as a heading.',
+    used.has('columns')&&'columns layout=a:b:c: a CSS grid with grid-template-columns of a fr, b fr, c fr; extra children wrap onto new rows; below 768 px collapse to one column in source order.',
+    used.has('inline')&&'inline: a wrapping flex row; make buttons full width on narrow screens.',
+    used.has('card')&&'card: a bordered, padded box.',
+    used.has('nav')&&'nav: a <nav> landmark that collapses to a menu button below 768 px.',
+    used.has('table')&&'table: a real <table> inside a wrapper with overflow-x: auto.',
+    used.has('tabs')&&'tabs: an accessible tab list (role=tablist) with one panel per tab.',
+    used.has('modal')&&'modal: a <dialog> hidden by default; state your assumption about what opens it.',
+    used.has('image')&&'image: responsive (max-width: 100%, fixed aspect ratio) with alt text taken from its label.',
+    'Use rem units, relative spacing and CSS variables for colours and spacing.'].filter(Boolean);
+  const fields=fl.filter(k=>/^(input|select|checkbox)$/.test(k.type)).map(k=>`- ${tn(k)}: ${k.label} (${k.type==='input'?(k.attrs.type||'text'):k.type}${k.attrs.options?': '+k.attrs.options.split('|').join(', '):''})`);
+  const tabs=fl.filter(k=>k.type==='table').map(k=>`- ${tn(k)}: table “${k.label||'untitled'}” with columns ${(k.attrs.cols||'').split('|').join(', ')}`);
+  const urls=$('#airefs').value.split(/[\s,]+/).filter(u=>/^https?:\/\//i.test(u));
+  const refs=`## Reference URLs\n${urls.length?urls.map(u=>'- '+u).join('\n')+'\nVisit these (if you can browse) and base the visual design on them: typography, colour, spacing and tone. Do not copy their content.':'Add one or more URLs here, one per line, for sites whose look and feel the design should follow (leave blank if none):\n- https://\n- https://'}\nIf you cannot open the URLs, ask me for screenshots or a description instead.\n\n`;
+  const hints=(tg==='php'||tg==='fw')?`\n## Data hints (infer ${tg==='php'?'MySQL tables':'models and forms'} from these)\n${[...fields,...tabs].join('\n')||'- None'}\n`:'';
+  return `# ${pn()}: build brief (made with UXSpace)
+
+## Goal
+${T.goal}
+
+## Files to produce
+${T.files.map(x=>'- '+x).join('\n')}
+
+## Rules
+${[...T.extra,...resp].map(x=>'- '+x).join('\n')}
+
+## Screens and navigation
+${nav}
+
+## Shared components checklist
+${shared}
+${cs.length?'\n'+shHow+'\n':''}
+## Requirements checklist
+${[...notes,...generic].join('\n')}
+${hints}
+## Design spec (indentation = nesting; -> "Screen" = navigation)
+${F}text
+${specText()}${F}
+${$('#airef').checked?`\n## Reference wireframe (generated HTML, for visual intent only)\n${F}html\n${htmlText()}${F}\n`:''}
+${refs}## Before you start
+Ask me about anything ambiguous, list your assumptions at the top of your reply, then produce every file in full. Finish with a short checklist showing which requirements you met.
+`;
+}
+function showExp(){
+  $$('[data-x]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.x===X));
+  $('#aiopts').hidden=X!=='ai';
+  $('#out').value=X==='ai'?aiText():X==='html'?htmlText():specText();
+}
+$$('[data-x]').forEach(b=>b.onclick=()=>{X=b.dataset.x;showExp()});
+$('#copy').onclick=async()=>{
+  const o=$('#out');o.focus();o.select();
+  try{await navigator.clipboard.writeText(o.value);$('#copy').textContent='Copied'}catch(e){$('#copy').textContent='Press copy on the selected text'}
+  setTimeout(()=>$('#copy').textContent='Copy',2000);
+};
+$$('[data-d]').forEach(b=>b.onclick=()=>{D=b.dataset.d;$$('[data-d]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.d===D));showPrev()});
+const CONT=new Set(['card','section','columns','column','inline','form','nav','modal']);
+const HINT={table:'cols=Name|Status|Due rows=3',tabs:'items=Overview|Tasks|Files',input:'type=email id=email',select:'options=One|Two|Three',grid:'cols=3',button:'style=secondary'};
+const maxLine=n=>Math.max(n.line,...n.children.map(maxLine));
+function containers(n,out=[]){n.children.forEach(c=>{if(CONT.has(c.type)){out.push(c);containers(c,out)}});return out}
+function setOpts(sel,html){const v=sel.value;sel.innerHTML=html;if([...sel.options].some(o=>o.value===v))sel.value=v}
+function fillForm(){
+  const ss=data.screens;
+  setOpts($('#fs'),ss.map(s=>`<option value="${s.line}">${esc(s.label)}</option>`).join(''));
+  setOpts($('#fto'),'<option value="">(none)</option>'+ss.map(s=>`<option>${esc(s.label)}</option>`).join(''));
+  const s=ss.find(s=>String(s.line)===$('#fs').value);
+  setOpts($('#fc'),'<option value="root">Top of screen</option>'+(s?containers(s).map(c=>`<option value="${c.line}">${'– '.repeat(c.depth-1)}${c.type} (line ${c.line})</option>`).join(''):''));
+}
+$('#fs').onchange=fillForm;
+$('#ft').onchange=()=>{const t=$('#ft').value;$('#fx').placeholder=HINT[t]||'(optional)';$('#fto').disabled=!(t==='button'||t==='link')};
+$('#fl').onkeydown=e=>{if(e.key==='Enter')$('#fadd').click()};
+$('#fadd').onclick=()=>{
+  const s=data.screens.find(s=>String(s.line)===$('#fs').value);if(!s)return;
+  const t=$('#ft').value,cv=$('#fc').value,c=cv==='root'?s:containers(s).find(c=>String(c.line)===cv)||s;
+  const label=$('#fl').value.replace(/"/g,"'").trim(),to=$('#fto').disabled?'':$('#fto').value,x=$('#fx').value.trim();
+  const txt=' '.repeat((c.depth+1)*2)+t+(label?` "${label}"`:'')+(to?` -> ${/\s/.test(to)?`"${to}"`:to}`:'')+(x?' '+x:'');
+  const L=ta.value.split('\n');const pv=$('#fp').value;L.splice(pv==='end'?maxLine(c):+pv-1,0,txt);setText(L.join('\n'));if(pv!=='end')$('#fp').value=String(+pv+1);
+  $('#fl').value='';$('#fx').value='';$('#fl').focus();
+};
+$('#fnew').onclick=()=>{
+  const n=$('#fns').value.trim().replace(/"/g,"'");if(!n)return;
+  const v=ta.value.replace(/\s+$/,'');ta.value=v+(v?'\n\n':'')+'screen "'+n+'"\n';
+  $('#fns').value='';refresh();
+  $('#fs').value=String(data.screens[data.screens.length-1].line);fillForm();
+};
+let undoTxt=null;
+const lab=n=>`${n.type}${n.label?` “${n.label}”`:''}`;
+function all(n,out=[]){n.children.forEach(c=>{out.push(c);all(c,out)});return out}
+function curC(){const s=data.screens.find(s=>String(s.line)===$('#fs').value);if(!s)return[];const cv=$('#fc').value;return[s,cv==='root'?s:containers(s).find(c=>String(c.line)===cv)||s]}
+function fillMore(){
+  const[s,c]=curC();
+  setOpts($('#fp'),'<option value="end">At end</option>'+(c?c.children.map(k=>`<option value="${k.line}">Before ${esc(lab(k))}</option>`).join(''):''));
+  setOpts($('#fm'),s?[s,...all(s)].map(k=>`<option value="${k.line}">${'– '.repeat(k.depth)}${esc(lab(k))}</option>`).join(''):'');
+}
+function setText(t){undoTxt=ta.value;ta.value=t;refresh()}
+function pick(){const s=curC()[0];return s&&[s,...all(s)].find(k=>String(k.line)===$('#fm').value)}
+function swap(f,g){const L=ta.value.split('\n'),a=f.line-1,b=maxLine(f),c=g.line-1,d=maxLine(g);L.splice(a,d-a,...L.slice(c,d),...L.slice(b,c),...L.slice(a,b));setText(L.join('\n'));return{f:a+d-b+1,g:a+1}}
+function mv(dir){
+  const n=pick();if(!n)return;
+  const sib=n.parent?n.parent.children:data.screens,o=sib[sib.indexOf(n)+dir];if(!o)return;
+  const r=dir<0?swap(o,n):swap(n,o);$('#fm').value=String(dir<0?r.g:r.f);
+}
+$('#fs').onchange=()=>{fillForm();fillMore()};
+$('#fc').onchange=fillMore;
+$('#fup').onclick=()=>mv(-1);
+$('#fdn').onclick=()=>mv(1);
+$('#fdel').onclick=()=>{const n=pick();if(!n)return;const L=ta.value.split('\n');L.splice(n.line-1,maxLine(n)-n.line+1);setText(L.join('\n'));$('#fm').value='';fillTargets()};
+$('#fundo').onclick=()=>{if(undoTxt!==null){const t=undoTxt;undoTxt=ta.value;ta.value=t;refresh()}};
+document.addEventListener('click',e=>{const b=e.target.closest('.wtabs button');if(b)b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
+var COMPS;
+let M='select';
+const tops=()=>[...data.screens,...data.comps];
+const flat=()=>tops().flatMap(s=>[s,...all(s)]);
+const nm=k=>k.type==='component'?'Shared component: '+k.label:k.label;
+const nl=k=>k.type==='screen'||k.type==='component'?nm(k):lab(k);
+function curC(){const s=tops().find(s=>String(s.line)===$('#fs').value);if(!s)return[];const cv=$('#fc').value;return[s,cv==='root'?s:containers(s).find(c=>String(c.line)===cv)||s]}
+function pick(){return flat().find(k=>String(k.line)===$('#fm').value)}
+function hilite(){$$('#stage [data-l]').forEach(x=>x.classList.toggle('sel',x.dataset.l===$('#fm').value));updateHL();fillVals()}
+function fillForm(){
+  setOpts($('#fs'),tops().map(s=>`<option value="${s.line}">${esc(nm(s))}</option>`).join('')+'<option value="ns">+ Add new screen…</option><option value="nc">+ Add new shared component…</option>');
+  $('#newrow').hidden=!/^n[sc]$/.test($('#fs').value);
+  setOpts($('#fto'),'<option value="">(none)</option>'+data.screens.map(s=>`<option>${esc(s.label)}</option>`).join(''));
+  syncLabel();
+  $('#fns').placeholder=$('#fs').value==='nc'?'New shared component name':'New screen name';
+  const s=curC()[0];
+  setOpts($('#fc'),'<option value="root">Screen</option>'+(s?containers(s).map(c=>`<option value="${c.line}">${'– '.repeat(c.depth-1)}${esc(lab(c))}</option>`).join(''):''));
+}
+function fillMore(){
+  const cc=curC(),c=cc[1];if(c)CTX={s:cc[0],c};
+  setOpts($('#fp'),'<option value="end">At end</option>'+(c?c.children.map(k=>`<option value="${k.line}">Before ${esc(lab(k))}</option>`).join(''):''));
+  setOpts($('#fm'),'<option value="">Select an element…</option>'+flat().map(k=>`<option value="${k.line}">${'– '.repeat(k.depth)}${esc(nl(k))}</option>`).join(''));
+  fillTargets();
+}
+function fillTargets(){
+  const n=pick(),ok=n&&n.type!=='screen'&&n.type!=='component';
+  setOpts($('#fmt'),ok?flat().filter(k=>(k.type==='screen'||k.type==='component'||CONT.has(k.type))&&(k.line<n.line||k.line>maxLine(n))).map(k=>`<option value="${k.line}">${'– '.repeat(k.depth)}${esc(nl(k))}</option>`).join(''):'');
+  hilite();
+}
+function mv(dir){
+  const n=pick();if(!n)return;
+  const sib=n.parent?n.parent.children:n.type==='component'?data.comps:data.screens,o=sib[sib.indexOf(n)+dir];if(!o)return;
+  const r=dir<0?swap(o,n):swap(n,o);$('#fm').value=String(dir<0?r.g:r.f);fillTargets();
+}
+$('#fm').onchange=fillTargets;
+$('#fns').onkeydown=e=>{if(e.key==='Enter')$('#fnew').click()};
+$('#fadd').onclick=()=>{
+  const[s,c]=curC();if(!s)return;
+  const t=$('#ft').value,label=$('#fl').value.replace(/"/g,"'").trim(),to=$('#fto').disabled?'':$('#fto').value,x=$('#fx').value.trim(),pv=$('#fp').value;
+  const txt=' '.repeat((c.depth+1)*2)+t+(label?` "${label}"`:'')+(to?` -> ${/\s/.test(to)?`"${to}"`:to}`:'')+(x?' '+x:'');
+  const L=ta.value.split('\n');L.splice(pv==='end'?maxLine(c):+pv-1,0,txt);setText(L.join('\n'));
+  if(CONT.has(t)){$('#fc').value=String(pv==='end'?maxLine(c)+1:+pv);fillMore()}else if(pv!=='end')$('#fp').value=String(+pv+1);
+  $('#fl').value='';$('#fx').value='';$('#fl').focus();
+};
+$('#fnew').onclick=()=>{
+  const n=$('#fns').value.trim().replace(/"/g,"'"),k=$('#fs').value==='nc'?'component':'screen';if(!n)return;
+  const v=ta.value.replace(/\s+$/,'');setText(v+(v?'\n\n':'')+k+' "'+n+'"\n');
+  $('#fns').value='';
+  $('#fs').value=String(tops().reduce((a,b)=>b.line>a.line?b:a).line);fillForm();fillMore();
+};
+$('#fmv').onclick=()=>{
+  const n=pick(),t=flat().find(k=>String(k.line)===$('#fmt').value);if(!n||!t)return;
+  const L=ta.value.split('\n'),a=n.line-1,b=maxLine(n),len=b-a,d=(t.depth+1-n.depth)*2;
+  const blk=L.slice(a,b).map(x=>d>=0?' '.repeat(d)+x:x.slice(Math.min(-d,x.search(/\S|$/))));
+  let at=maxLine(t);if(a<at)at-=len;
+  L.splice(a,len);L.splice(at,0,...blk);setText(L.join('\n'));
+  $('#fm').value=String(at+1);fillTargets();
+};
+$$('[data-m]').forEach(b=>b.onclick=()=>{M=b.dataset.m;$$('[data-m]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===M))});
+$('#stage').addEventListener('click',e=>{
+  if(M!=='select')return;
+  const el=e.target.closest('[data-l]');if(!el)return;
+  $('#fm').value=el.dataset.l;fillTargets();const pn=pick();if(pn)ta.scrollTop=Math.max(0,(pn.line-3)*24);if(pn)syncToNode(pn);
+});
+$('#sample').onclick=()=>setText(SAMPLE);
+const L8=[['2 equal columns','1:1'],['3 equal columns','1:1:1'],['4 equal columns','1:1:1:1'],['Main + sidebar (2:1)','2:1'],['Main + narrow sidebar (3:1)','3:1'],['Sidebar + main (1:2)','1:2'],['Narrow sidebar + main (1:3)','1:3'],['Sidebar + main + sidebar (1:2:1)','1:2:1']];
+const T3=(l,k)=>l.map(x=>[x.replace(/\|/g,' | '),{[k]:x}]);
+const EXT={
+  input:{l:'Type',k:['type'],o:[['Text',{}],['Email',{type:'email'}],['Password',{type:'password'}],['Number',{type:'number'}],['Search',{type:'search'}],['Phone',{type:'tel'}]]},
+  button:{l:'Style',k:['style'],o:[['Primary',{}],['Secondary',{style:'secondary'}]]},
+  select:{l:'Options',k:['options'],c:1,o:T3(['Option 1|Option 2|Option 3','Yes|No','Low|Medium|High','Planning|In progress|Done','All|Active|Archived'],'options')},
+  table:{l:'Columns',k:['cols','rows'],c:1,o:['Name|Role|Status','Task|Owner|Due','Item|Quantity|Price','Name|Email|Date'].map(x=>[x.replace(/\|/g,' | '),{cols:x,rows:'3'}])},
+  tabs:{l:'Tabs',k:['items'],c:1,o:T3(['Overview|Details|Settings','Home|Profile|Settings','Tab 1|Tab 2|Tab 3','All|Active|Archived'],'items')},
+  columns:{l:'Layout',k:['layout'],o:L8.map(([a,b])=>[a,{layout:b}])}
+};
+const optsOf=e=>e.o.map((o,i)=>`<option value="${i}">${esc(o[0])}</option>`).join('')+(e.c?'<option value="c">Custom\u2026</option>':'');
+function syncExtra(){
+  const t=$('#ft').value,e=EXT[t],f=$('#fly'),x=$('#fx');
+  $('#fxl').parentNode.hidden=!e;
+  if(!e)return;
+  $('#fxl').textContent=e.l;
+  if(f.dataset.t!==t){f.innerHTML=optsOf(e);f.value='0';f.dataset.t=t}
+  f.hidden=false;x.hidden=f.value!=='c';
+}
+const extraObj=t=>{const e=EXT[t],v=$('#fly').value;return e&&v!=='c'?e.o[+v][1]:{}};
+const extraStr=t=>{const e=EXT[t];if(!e)return'';return $('#fly').value==='c'?$('#fx').value.trim():attrStr(e.o[+$('#fly').value][1])};
+$('#fly').addEventListener('change',syncExtra);
+const mg=(a,e)=>attrStr(Object.fromEntries(e.k.filter(k=>a[k]!==undefined).map(k=>[k,a[k]])));
+function fillVx(n){
+  const e=n&&EXT[n.type],f=$('#vly'),x=$('#vx');
+  $('#vxl').parentNode.hidden=!e;
+  if(!e){f.hidden=true;x.hidden=true;x.value='';return}
+  $('#vxl').textContent=e.l;f.hidden=false;f.innerHTML=optsOf(e);
+  const cur=mg(n.attrs,e),i=e.o.findIndex(o=>mg(o[1],e)===cur);
+  f.value=i>=0?String(i):(e.c?'c':'0');
+  x.value=f.value==='c'?cur:'';x.hidden=f.value!=='c';
+}
+function applyAttrs(n,t){
+  const e=EXT[t],b={...n.attrs};
+  if(!e)return attrStr(b);
+  e.k.forEach(k=>delete b[k]);
+  const v=$('#vly').value;
+  if(v==='c')return[attrStr(b),$('#vx').value.trim()].filter(Boolean).join(' ');
+  return attrStr({...b,...e.o[+v][1]});
+}
+$('#vly').addEventListener('change',()=>{$('#vx').hidden=$('#vly').value!=='c'});
+var CTX=null;
+let TUT=null;
+const pn=()=>$('#pname').value.trim()||'Untitled project';
+const pf=n=>slug(pn())+'-'+n;
+try{$('#pname').value=localStorage.getItem('wfw-name')||''}catch(e){}
+$('#pname').addEventListener('input',()=>{
+  try{localStorage.setItem('wfw-name',$('#pname').value)}catch(e){}
+  document.title=$('#pname').value.trim()?$('#pname').value.trim()+' \u00b7 UXSpace':'UXSpace';
+  if(T==='exp')showExp();
+});
+$('#airefs').addEventListener('input',showExp);
+$('#clear').onclick=()=>{TUT=null;setText('')};
+$('#fnew').onclick=()=>{
+  const n=$('#fns').value.trim().replace(/"/g,"'"),isC=$('#fs').value==='nc';if(!n)return;
+  const L=ta.value.replace(/\s+$/,'').split('\n');
+  if(isC&&CTX)L.splice(maxLine(CTX.c),0,' '.repeat((CTX.c.depth+1)*2)+'use "'+n+'"');
+  const v=L.join('\n');
+  setText(v+(v?'\n\n':'')+(isC?'component':'screen')+' "'+n+'"\n');
+  $('#fns').value='';
+  $('#fs').value=String(tops().reduce((a,b)=>b.line>a.line?b:a).line);fillForm();fillMore();
+};
+$('#dl').onclick=()=>{
+  const m={ai:['handoff.md','text/markdown'],html:['wireframe.html','text/html'],spec:['spec.txt','text/plain']}[X];
+  saveFile(pf(m[0]),new Blob([$('#out').value],{type:m[1]+';charset=utf-8'}));
+};
+const homeN=()=>data.screens.find(s=>slug(s.label)==='home'),aboutN=()=>data.screens.find(s=>slug(s.label)==='about');
+const hn=()=>homeN()?all(homeN()):[],an=()=>aboutN()?all(aboutN()):[];
+function addTo(label,txt){
+  const L=ta.value.replace(/\s+$/,'').split('\n'),n=tops().find(s=>slug(s.label)===slug(label));
+  if(!n){setText((L.join('\n')?L.join('\n')+'\n\n':'')+'screen "'+label+'"\n'+(txt?txt+'\n':''));return}
+  L.splice(maxLine(n),0,...(txt?txt.split('\n'):[]));setText(L.join('\n')+'\n');
+}
+const BASIC=[
+ {t:'Create a screen',d:'Open <b>Within screen</b>, choose <b>+ Add new screen\u2026</b>, type <b>Home</b> and press <b>Create</b>. Your earlier text is kept: <b>Undo</b> in the Edit box brings it back.',ok:()=>!!homeN(),act:()=>addTo('Home','')},
+ {t:'Add a header',d:'In <b>Element</b> choose <b>Section (full-width band)</b>, set <b>Label</b> to Header and press <b>Add element</b>. <b>Inside</b> switches to the new section, so next add a <b>Heading</b> labelled \u201cMy site\u201d.',ok:()=>hn().some(k=>k.type==='section'&&/header/i.test(k.label)&&k.children.some(c=>c.type==='heading')),act:()=>addTo('Home','  section "Header"\n    heading "My site"')},
+ {t:'Add a navigation bar with search',d:'Set <b>Inside</b> back to <b>Screen</b>. Add a <b>Nav</b>; <b>Inside</b> switches to it. Add three <b>Link</b> elements (Home, About, Contact) and an <b>Input</b> labelled Search with Extra <b>type=search</b>.',ok:()=>hn().some(k=>k.type==='nav'&&all(k).some(c=>c.type==='input')),act:()=>addTo('Home','  nav\n    link "Home" -> "Home"\n    link "About"\n    link "Contact"\n    input "Search" type=search')},
+ {t:'Add main content with a sidebar',d:'Set <b>Inside</b> to <b>Screen</b>, add <b>Columns</b> and choose <b>Main + sidebar (2:1)</b>. Two empty columns appear and <b>Inside</b> moves to the first: add a Heading and a Paragraph there. Then choose the second column in <b>Inside</b> and add a Card.',ok:()=>hn().some(k=>k.type==='columns'&&k.children.length>=2&&k.children.every(c=>c.children.length||c.type==='card')),act:()=>addTo('Home','  columns layout=2:1\n    column\n      heading "Main content"\n      paragraph\n    column\n      card\n        heading "Sidebar"\n        text "Related links go here."')},
+ {t:'Add a footer',d:'Set <b>Inside</b> to <b>Screen</b>, add a <b>Section</b> labelled Footer, then add a <b>Text</b> inside it.',ok:()=>hn().some(k=>k.type==='section'&&/footer/i.test(k.label)&&k.children.length),act:()=>addTo('Home','  section "Footer"\n    text "\u00a9 2026 My site"')},
+ {t:'Check it on mobile',d:'Use <b>Mobile</b> and <b>Widescreen</b> above the preview to see the columns stack. In <b>Edit</b> mode, click any element to select it, then change its values in the Edit box. You have built a basic page.'}
+];
+const ADV=[
+ {t:'Add a second screen',d:'Add a screen called <b>About</b> the same way as before (<b>Within screen</b> \u2192 <b>+ Add new screen\u2026</b>), then give it a Heading and a Paragraph.',ok:()=>!!aboutN(),act:()=>addTo('About','  heading "About us"\n  paragraph')},
+ {t:'Share the navigation',d:'Choose <b>+ Add new shared component\u2026</b> and name it <b>Site nav</b>. It is added to the container you were last working in. Give it a Nav with links to Home and About and a search Input, then add <b>Use shared component</b> to each screen. Delete Home\u2019s own nav in the Edit box.',ok:()=>data.comps.some(c=>slug(c.label)==='site-nav')&&flat().filter(k=>k.type==='use'&&slug(k.label)==='site-nav').length>=2,act:()=>{let t=ta.value.replace(/\s+$/,'');if(/component "Site nav"/.test(t)||!aboutN())return;t=t.replace(/^(screen "(?:Home|About)"\n)/gm,'$1  use "Site nav"\n');setText(t+'\n\ncomponent "Site nav"\n  nav\n    link "Home" -> "Home"\n    link "About" -> "About"\n    input "Search" type=search\n')}},
+ {t:'Tabs and a table',d:'On About add <b>Tabs</b> (Extra: items=Team|History|Contact) and a <b>Table</b> (Extra: cols=Name|Role rows=3).',ok:()=>an().some(k=>k.type==='tabs')&&an().some(k=>k.type==='table'),act:()=>addTo('About','  tabs items=Team|History|Contact\n  table "Team" cols=Name|Role rows=3')},
+ {t:'A button group and a modal',d:'On About add an <b>Inline group</b> containing a Button, then a <b>Modal</b> with some Text and a Close button.',ok:()=>an().some(k=>k.type==='modal'),act:()=>addTo('About','  inline\n    button "Sign up"\n  modal "Thanks for signing up"\n    text "We will be in touch."\n    button "Close" style=secondary')},
+ {t:'Notes and Run mode',d:'Add a <b>Note</b> that describes behaviour, such as \u201cSearch filters the team table\u201d. Then press <b>Run</b> above the preview and click the links to move between screens.',ok:()=>an().some(k=>k.type==='note'),act:()=>addTo('About','  note "Search filters the team table"')},
+ {t:'Export',d:'Open the <b>Flow</b> tab to see how the screens connect. On <b>Export</b>, choose a Build target, add reference URLs, then <b>Copy</b> or <b>Download</b> the AI handoff, or save images from under the preview.'}
+];
+function renderTut(){
+  const el=$('#tut');
+  if(!TUT){el.hidden=true;return}
+  const st=TUT.steps[TUT.i],last=TUT.i===TUT.steps.length-1,done=st.ok?st.ok():null;
+  el.hidden=false;
+  el.innerHTML=`<h3>${TUT.name}: step ${TUT.i+1} of ${TUT.steps.length} \u00b7 ${st.t}</h3><p>${st.d}</p>${done===null?'':`<p class="ok">${done?'\u2713 Done':'Not done yet'}</p>`}<div class="bar" style="margin:0"><button class="act" id="tprev"${TUT.i?'':' disabled'}>\u2190 Back</button>${st.act?'<button class="act" id="tdo">Do it for me</button>':''}<button class="act" id="tnext">${last?'Finish':'Next \u2192'}</button>${last&&!TUT.adv?'<button class="act" id="tadv">Start advanced tutorial</button>':''}<button class="act" id="tclose">Close</button></div>`;
+}
+$('#tut').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b||!TUT)return;
+  const st=TUT.steps[TUT.i];
+  if(b.id==='tprev')TUT.i--;
+  else if(b.id==='tnext'){if(TUT.i===TUT.steps.length-1)TUT=null;else TUT.i++}
+  else if(b.id==='tdo'){if(!(st.ok&&st.ok()))st.act()}
+  else if(b.id==='tadv')TUT={name:'Advanced tutorial',steps:ADV,i:0,adv:true};
+  else if(b.id==='tclose')TUT=null;
+  renderTut();
+});
+$('#tutload').onclick=()=>{TUT={name:'Tutorial',steps:BASIC,i:0};setText('')};
+$('#imgscope').addEventListener('change',()=>{$('#imgdir').hidden=$('#imgscope').value!=='all'});
+['#aitarget','#aifw','#airef'].forEach(q=>$(q).addEventListener('change',()=>{$('#fwrow').hidden=$('#aitarget').value!=='fw';showExp()}));
+$('#fadd').onclick=()=>{
+  const[s,c]=curC();if(!s)return;
+  const t=$('#ft').value,pv=$('#fp').value,col=t==='columns';
+  const label=(t==='use'?$('#fls').value:$('#fl').value).replace(/"/g,"'").trim();
+  const to=$('#fto').disabled?'':$('#fto').value,x=extraStr(t);
+  const ind=' '.repeat((c.depth+1)*2);
+  const txt=[ind+t+(label?` "${label}"`:'')+(to?` -> "${to}"`:'')+(x?' '+x:'')];
+  if(col)extraObj(t).layout.split(':').forEach(()=>txt.push(ind+'  column'));
+  const at=pv==='end'?maxLine(c):+pv-1,L=ta.value.split('\n');
+  L.splice(at,0,...txt);setText(L.join('\n'));
+  if(col||CONT.has(t)){$('#fc').value=String(at+1+(col?1:0));fillMore()}
+  else if(pv!=='end')$('#fp').value=String(+pv+txt.length);
+  $('#fl').value='';$('#fx').value='';$('#fl').focus();
+};
+const LOREM='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
+function syncLabel(){
+  const u=$('#ft').value==='use',l=$('#fl');
+  l.hidden=u;$('#fls').hidden=!u;$('#fll').textContent=u?'Shared component':'Label';
+  syncExtra();
+  setOpts($('#fls'),data.comps.length?data.comps.map(c=>`<option>${esc(c.label)}</option>`).join(''):'<option value="">(none defined yet)</option>');
+  if(u){l.value=$('#fls').value;l.dataset.u='1'}else if(l.dataset.u){l.value='';l.dataset.u=''}
+}
+$('#ft').addEventListener('change',syncLabel);
+$('#fls').onchange=()=>{$('#fl').value=$('#fls').value};
+$('#fadd').addEventListener('click',()=>{if($('#ft').value==='use')$('#fl').value=$('#fls').value});
+function syncToScreen(){
+  const s=data.screens.find(s=>slug(s.label)===cur);if(!s)return;
+  $('#fs').value=String(s.line);fillForm();$('#fc').value='root';fillMore();
+}
+function syncToNode(n){
+  let t=n;while(t.parent)t=t.parent;
+  const c=CONT.has(n.type)?n:n.parent;
+  $('#fs').value=String(t.line);fillForm();$('#fc').value=c&&c!==t?String(c.line):'root';fillMore();
+}
+const qt=v=>`"${v}"`;
+const attrStr=a=>Object.entries(a).map(([k,v])=>k+'='+(/\s/.test(v)?`"${v}"`:v)).join(' ');
+function fillVals(){
+  const n=pick(),on=!!n,lk=on&&(n.type==='button'||n.type==='link');
+  setOpts($('#vto'),'<option value="">(none)</option>'+data.screens.map(s=>`<option>${esc(s.label)}</option>`).join(''));
+  $('#vl').value=on?n.label:'';fillVx(n);
+  const m=lk&&data.screens.find(s=>slug(s.label)===slug(n.to));
+  $('#vto').value=m?m.label:'';
+  ['#vl','#vx','#vly','#vapply'].forEach(s=>$(s).disabled=!on);$('#vto').disabled=!lk;
+}
+$('#vapply').onclick=()=>{
+  const n=pick();if(!n)return;
+  const L=ta.value.split('\n'),ind=L[n.line-1].match(/^ */)[0],ln=n.line;
+  const label=$('#vl').value.replace(/"/g,"'").trim(),to=$('#vto').disabled?'':$('#vto').value,x=applyAttrs(n,n.type);
+  L[ln-1]=ind+n.type+(label?` "${label}"`:'')+(to?` -> ${qt(to)}`:'')+(x?' '+x:'');
+  if(label&&label!==n.label){
+    if(n.type==='screen')L.forEach((l,i)=>{if(i!==ln-1)L[i]=l.replace(/->\s*(?:"([^"]*)"|(\S+))/g,(m,a,b)=>slug(a??b)===slug(n.label)?'-> '+qt(label):m)});
+    if(n.type==='component')L.forEach((l,i)=>{if(i!==ln-1)L[i]=l.replace(/^(\s*use\s+)(?:"([^"]*)"|(\S+))/,(m,p,a,b)=>slug(a??b)===slug(n.label)?p+qt(label):m)});
+  }
+  setText(L.join('\n'));$('#fm').value=String(ln);fillTargets();
+};
+const LIGHT='--card:#fff;--fg:#1d2733;--mut:#5d6b7a;--bd:#c5cdd6;--ac:#1f5fbf;--note:#fff4c2;--noteb:#d4b02a;--notef:#4d3d00';
+function sheet(all){
+  const ss=all?data.screens:data.screens.filter(s=>slug(s.label)===cur),w=D==='wide'?960:420;
+  const b=document.createElement('div');b.className='wf';b.setAttribute('data-cap','1');
+  b.style.cssText=LIGHT+';position:fixed;left:-99999px;top:0;display:flex;flex-direction:'+(all&&$('#imgdir').value==='h'?'row':'column')+';gap:24px;align-items:flex-start;padding:24px;background:#fff;color:#1d2733';
+  b.innerHTML=ss.map(s=>`<div style="width:${w}px"><div style="text-align:center;color:#5d6b7a;font-size:13px;margin-bottom:6px">${esc(s.label)}</div><div class="screen${D==='wide'?' wide':''}" style="max-width:none">${s.children.map(c=>R(c,$('#shownotes').checked)).join('')}</div></div>`).join('');
+  document.body.appendChild(b);return b;
+}
+async function png(b){
+  const c=await html2canvas(b,{scale:2,backgroundColor:'#ffffff',logging:false,onclone:d=>{const e=d.querySelector('[data-cap]');if(e)e.style.left='0'}});
+  return new Promise(r=>c.toBlob(r,'image/png'));
+}
+const say=t=>$$('.imgmsg').forEach(m=>m.textContent=t);
+async function saveFile(name,data){
+  try{
+    const dl=window.claude?await claude.use('downloads'):null;
+    if(!dl){const bl=data instanceof Blob?data:new Blob([data],{type:'image/svg+xml'}),a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=name;document.body.appendChild(a);a.click();a.remove();say('Saved '+name);return}
+    await dl.save({filename:name,data});say('Saved '+name);
+  }catch(e){say(e&&e.code==='declined'?'':'Could not save ('+((e&&e.code)||'error')+').')}
+}
+$('#png').onclick=async()=>{
+  const b=sheet($('#imgscope').value==='all');say('Making image…');
+  try{await saveFile(pf('wireframe.png'),await png(b))}catch(e){say('Could not make the image.')}finally{b.remove()}
+};
+$('#svg').onclick=async()=>{
+  const b=sheet($('#imgscope').value==='all'),w=b.offsetWidth,h=b.offsetHeight;
+  b.style.position='static';
+  const xml=new XMLSerializer().serializeToString(b);b.remove();
+  await saveFile(pf('wireframe.svg'),`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><foreignObject width="${w}" height="${h}"><style xmlns="http://www.w3.org/1999/xhtml">${WFCSS}</style>${xml}</foreignObject></svg>`);
+};
+function updateHL(){
+  const n=pick(),h=$('#hl');
+  if(!n){h.innerHTML='';return}
+  const L=ta.value.split('\n'),a=n.line-1,b=maxLine(n);
+  h.innerHTML=esc(L.slice(0,a).join('\n'))+(a?'\n':'')+'<mark>'+esc(L.slice(a,b).join('\n'))+'</mark>'+(b<L.length?'\n':'')+esc(L.slice(b).join('\n'))+'\n';
+  h.scrollTop=ta.scrollTop;
+}
+let selB=0,lnB=0;
+ta.addEventListener('beforeinput',()=>{selB=+$('#fm').value||0;lnB=ta.value.split('\n').length});
+ta.addEventListener('input',()=>{
+  const d=ta.value.split('\n').length-lnB,cl=ta.value.slice(0,ta.selectionStart).split('\n').length;
+  if(selB&&d&&(d>0?cl<=selB:cl<selB)){$('#fm').value=String(selB+d);fillTargets()}
+});
+ta.addEventListener('scroll',()=>{$('#hl').scrollTop=ta.scrollTop});
+refresh();
+</script>
+</body>
+</html>
