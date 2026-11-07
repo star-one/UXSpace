@@ -38,6 +38,12 @@ main{padding:16px}
 .formp fieldset{border:1px solid var(--bd);border-radius:8px;margin:10px 0 0;padding:4px 12px 12px;background:var(--panel)}
 .formp legend{font-weight:700;padding:0 6px}
 #stage .sel{outline:2px solid var(--ac);outline-offset:2px}
+.glow{outline:3px solid #f5a300;outline-offset:2px;border-radius:6px}
+#tut .td ol{margin:4px 0 8px;padding-left:20px}
+#tut .td p{margin:4px 0 8px}
+.app-f{border-top:1px solid var(--bd);margin-top:24px;padding:16px;font-size:13px;color:var(--mut);display:flex;flex-direction:column;gap:6px}
+.app-f p{margin:0}
+.app-f a{color:var(--ac)}
 #flowstart,#flowdepth{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg)}
 #tut{border:2px solid var(--ac);border-radius:10px;padding:12px;margin:0 0 12px;background:var(--panel)}
 #tut h3{margin:0 0 4px;font-size:16px}
@@ -109,7 +115,7 @@ details pre{white-space:pre-wrap;margin:8px 0 0;color:var(--mut)}
 <header>
 <h1>UXSpace</h1>
 <p>Describe screens in text. Preview them, click through, then export for an AI.</p>
-<div class="bar" style="margin:8px 0 0"><input id="pname" type="text" placeholder="Project name" aria-label="Project name" style="font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg);min-width:0;width:min(260px,100%)"><button class="act" id="sample">Load sample</button><button class="act" id="tutload">Load tutorial</button><button class="act" id="clear">Clear</button></div>
+<div class="bar" style="margin:8px 0 0"><input id="pname" type="text" placeholder="Project name" aria-label="Project name" style="font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg);min-width:0;width:min(260px,100%)"><button class="act" id="sample">Load sample</button><button class="act" id="tutload">Load tutorial</button><button class="act" id="clear">Clear</button><button class="act" id="psave">Save project</button><button class="act" id="pload">Load project</button><input type="file" id="pfile" accept=".json,application/json,.txt" hidden><span class="imgmsg"></span></div>
 </header>
 <nav class="tabs" role="tablist">
 <button data-t="build" aria-selected="true">Build</button>
@@ -125,7 +131,7 @@ details pre{white-space:pre-wrap;margin:8px 0 0;color:var(--mut)}
 <label>Within screen<select id="fs"></select></label>
 <label>Inside<select id="fc"></select></label>
 <label>Element<select id="ft"><optgroup label="Content"><option value="heading">Heading</option><option value="text">Text</option><option value="paragraph">Paragraph (Lorem ipsum)</option><option value="image">Image</option><option value="divider">Divider</option><option value="table">Table</option></optgroup><optgroup label="Form controls"><option value="input">Input</option><option value="select">Select</option><option value="checkbox">Checkbox</option></optgroup><optgroup label="Actions"><option value="button">Button</option><option value="link">Link</option><option value="tabs">Tabs</option></optgroup><optgroup label="Layout"><option value="section">Section (full-width band)</option><option value="columns">Columns (side by side, stack on mobile)</option><option value="column">Column (one column inside Columns)</option><option value="card">Card (bordered box)</option><option value="inline">Inline group (side by side, no box)</option></optgroup><optgroup label="Special"><option value="form">Form</option><option value="nav">Nav</option><option value="modal">Modal</option></optgroup><optgroup label="Reuse and notes"><option value="use">Use shared component</option><option value="note">Note</option></optgroup></select></label>
-<label><span id="fll">Label</span><input id="fl" type="text"><select id="fls" hidden></select></label>
+<label><span id="fll">Label</span><input id="fl" type="text" placeholder="Name it, to find it later"><select id="fls" hidden></select></label>
 <label>Goes to<select id="fto" disabled></select></label>
 <label><span id="fxl">Extra</span><input id="fx" type="text" placeholder="(optional)"><select id="fly" hidden><option value="1:1">2 equal columns</option><option value="1:1:1">3 equal columns</option><option value="1:1:1:1">4 equal columns</option><option value="2:1">Main + sidebar (2:1)</option><option value="3:1">Main + narrow sidebar (3:1)</option><option value="1:2">Sidebar + main (1:2)</option><option value="1:3">Narrow sidebar + main (1:3)</option><option value="1:2:1">Sidebar + main + sidebar (1:2:1)</option></select></label>
 <label>Position<select id="fp"></select></label>
@@ -134,7 +140,7 @@ details pre{white-space:pre-wrap;margin:8px 0 0;color:var(--mut)}
 <div class="bar"><button class="act" id="fadd">Add element</button></div>
 </fieldset>
 <fieldset><legend>Edit</legend>
-<div class="bar"><select id="fm" aria-label="Element to move or delete"></select><button class="act" id="fup">Up</button><button class="act" id="fdn">Down</button><button class="act" id="fdel">Delete</button><button class="act" id="fundo">Undo</button></div>
+<div class="bar"><select id="fm" aria-label="Element to move or delete"></select><button class="act" id="fup">Up</button><button class="act" id="fdn">Down</button><button class="act" id="fdel">Delete</button><button class="act" id="fundo">Undo</button><button class="act" id="fredo">Redo</button></div>
 <div class="fgrid"><label>Label<input id="vl" type="text"></label><label>Goes to<select id="vto"></select></label><label><span id="vxl">Extra</span><select id="vly" hidden></select><input id="vx" type="text" hidden></label><div class="bar" style="align-items:end"><button class="act" id="vapply">Apply values</button></div></div>
 <div class="bar"><select id="fmt" aria-label="Move into"></select><button class="act" id="fmv">Move into</button></div>
 </fieldset></div>
@@ -184,13 +190,15 @@ Notes become requirements in the AI handoff.</pre></details>
 <div class="bar">
 <button class="chip" data-x="ai" aria-pressed="true">AI handoff</button>
 <button class="chip" data-x="html" aria-pressed="false">HTML wireframe for testing</button>
-<button class="chip" data-x="spec" aria-pressed="false">Spec only</button>
+
 <button class="act" id="dl" style="margin-left:auto">Download</button><button class="act" id="copy">Copy</button><span class="imgmsg"></span>
 </div>
 <div class="fgrid" id="aiopts" style="margin:0 0 12px"><label>Build target<select id="aitarget"><option value="demo">Demo: HTML/CSS/JS with sample content and stock images</option><option value="starter">Starter: empty HTML/CSS/JS files</option><option value="php">PHP + MySQL project files</option><option value="fw">Framework project files</option></select></label><label id="fwrow" hidden>Framework<select id="aifw"><option>React</option><option>Next.js</option><option>Vue</option><option>Nuxt</option><option>Angular</option><option>SvelteKit</option><option>Laravel</option><option>Django</option><option>Ruby on Rails</option></select></label><label style="flex-direction:row;align-items:center;gap:6px;color:var(--fg)"><input type="checkbox" id="airef" style="width:auto"> Include reference wireframe HTML</label><label style="grid-column:1/-1">Reference URLs for the design (optional, one per line)<textarea id="airefs" rows="2" placeholder="https://example.com" style="font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--panel);color:var(--fg);width:100%;min-width:0;padding:7px 8px"></textarea></label></div>
 <textarea id="out" readonly spellcheck="false" aria-label="Export"></textarea>
 </section>
 </main>
+
+<footer class="app-f"><p>A personal project by Simon Gray. If you enjoy this, you might like some of my music on <a href="https://music.youtube.com/channel/UCrjMIoxnq99mDNAVFrSDAtQ?feature=share" target="_blank" rel="noopener">YouTube Music</a>, on <a href="https://open.spotify.com/artist/5CIBF9NCIxs4BwDytgXH8K" target="_blank" rel="noopener">Spotify</a>, on <a href="https://itunes.apple.com/gb/artist/the-winterval-conspiracy/915956596" target="_blank" rel="noopener">Apple Music</a>, and on <a href="https://www.amazon.co.uk/The-Winterval-Conspiracy/e/B00OT38POW/" target="_blank" rel="noopener">Amazon</a>. I’ve also got videos on <a href="https://www.youtube.com/@wintervalconspiracy" target="_blank" rel="noopener">YouTube</a>. If you like it enough to give me some money, you can do that via <a href="http://winterval.org.uk/" target="_blank" rel="noopener">Bandcamp</a>.</p><p>Made with Claude · <a href="https://github.com/star-one/UXSpace" target="_blank" rel="noopener">UXSpace on GitHub</a></p></footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -287,7 +295,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const slug=s=>String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const TYPES=new Set(['screen','card','section','column','form','nav','columns','inline','modal','table','tabs','component','use','paragraph','heading','text','input','select','checkbox','image','divider','button','link','note']);
 const ta=$('#src');
-try{ta.value=localStorage.getItem('wfw-spec')||SAMPLE}catch(e){ta.value=SAMPLE}
+try{ta.value=localStorage.getItem('wfw-spec')||''}catch(e){ta.value=''}
 
 function parse(src){
   const screens=[],comps=[],errs=[],stack=[];
@@ -353,7 +361,7 @@ const refresh=()=>{
   data=parse(ta.value);
   $('#errs').innerHTML=data.errs.map(e=>`<li>${esc(e)}</li>`).join('');
   try{localStorage.setItem('wfw-spec',ta.value)}catch(e){}
-  fillForm();fillMore();if(T==='build')showPrev();renderTut();
+  fillForm();fillMore();if(T==='build')showPrev();renderTut(true);
 };
 ta.addEventListener('input',refresh);
 ta.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const s=ta.selectionStart;ta.setRangeText('  ',s,ta.selectionEnd,'end')}});
@@ -372,7 +380,7 @@ function go(id,push=true){
 }
 function showPrev(){
   const ss=data.screens;
-  if(!ss.length){$('#stage').innerHTML='<p>Add a “screen” line in the Write tab.</p>';$('#screens').innerHTML='';return}
+  if(!ss.length){$('#stage').innerHTML='<div class="welcome"><h3>Welcome to UXSpace</h3><p>Plan screens and flows as text, preview them, then hand them to an AI to build. This project is empty. Choose how to start:</p><div class="bar"><button class="act" data-go="tut">Start the tutorial</button><button class="act" data-go="sample">Load the sample project</button></div><p>Or start from scratch: in the Add box, open <b>Within screen</b>, choose <b>+ Add new screen…</b>, type a name and press <b>Create</b>. To continue earlier work, use <b>Load project</b> at the top.</p></div>';$('#screens').innerHTML='';return}
   if(!ss.some(s=>slug(s.label)===cur))cur=slug(ss[0].label);
   $('#screens').innerHTML=ss.map(s=>`<button class="chip" aria-pressed="${slug(s.label)===cur}" data-id="${slug(s.label)}">${esc(s.label)}</button>`).join('');
   $$('#screens .chip').forEach(c=>c.onclick=()=>go(c.dataset.id));
@@ -594,7 +602,8 @@ function fillMore(){
   setOpts($('#fp'),'<option value="end">At end</option>'+(c?c.children.map(k=>`<option value="${k.line}">Before ${esc(lab(k))}</option>`).join(''):''));
   setOpts($('#fm'),s?[s,...all(s)].map(k=>`<option value="${k.line}">${'– '.repeat(k.depth)}${esc(lab(k))}</option>`).join(''):'');
 }
-function setText(t){undoTxt=ta.value;ta.value=t;refresh()}
+function setText(t){UNDO.push(ta.value);if(UNDO.length>60)UNDO.shift();REDO.length=0;ta.value=t;refresh();syncUR()}
+function syncUR(){$('#fundo').disabled=!UNDO.length;$('#fredo').disabled=!REDO.length}
 function pick(){const s=curC()[0];return s&&[s,...all(s)].find(k=>String(k.line)===$('#fm').value)}
 function swap(f,g){const L=ta.value.split('\n'),a=f.line-1,b=maxLine(f),c=g.line-1,d=maxLine(g);L.splice(a,d-a,...L.slice(c,d),...L.slice(b,c),...L.slice(a,b));setText(L.join('\n'));return{f:a+d-b+1,g:a+1}}
 function mv(dir){
@@ -607,7 +616,8 @@ $('#fc').onchange=fillMore;
 $('#fup').onclick=()=>mv(-1);
 $('#fdn').onclick=()=>mv(1);
 $('#fdel').onclick=()=>{const n=pick();if(!n)return;const L=ta.value.split('\n');L.splice(n.line-1,maxLine(n)-n.line+1);setText(L.join('\n'));$('#fm').value='';fillTargets()};
-$('#fundo').onclick=()=>{if(undoTxt!==null){const t=undoTxt;undoTxt=ta.value;ta.value=t;refresh()}};
+$('#fundo').onclick=()=>{if(UNDO.length){REDO.push(ta.value);ta.value=UNDO.pop();refresh();syncUR()}};
+$('#fredo').onclick=()=>{if(REDO.length){UNDO.push(ta.value);ta.value=REDO.pop();refresh();syncUR()}};
 document.addEventListener('click',e=>{const b=e.target.closest('.wtabs button');if(b)b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
 var COMPS;
 let M='select';
@@ -715,6 +725,21 @@ function applyAttrs(n,t){
   return attrStr({...b,...e.o[+v][1]});
 }
 $('#vly').addEventListener('change',()=>{$('#vx').hidden=$('#vly').value!=='c'});
+const UNDO=[],REDO=[];
+$('#stage').addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)(g.dataset.go==='tut'?$('#tutload'):$('#sample')).click()});
+$('#psave').onclick=()=>saveFile(slug(pn())+'-project.json',new Blob([JSON.stringify({app:'UXSpace',version:1,name:$('#pname').value.trim(),spec:ta.value},null,2)],{type:'application/json'}));
+$('#pload').onclick=()=>$('#pfile').click();
+$('#pfile').onchange=()=>{
+  const f=$('#pfile').files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let t=String(r.result),nm='';
+    try{const j=JSON.parse(t);if(j&&typeof j.spec==='string'){t=j.spec;nm=j.name||''}}catch(e){}
+    TUT=null;$('#pname').value=nm;$('#pname').dispatchEvent(new Event('input'));
+    setText(t);say('Loaded '+f.name);
+  };
+  r.readAsText(f);$('#pfile').value='';
+};
 var CTX=null;
 let TUT=null;
 const pn=()=>$('#pname').value.trim()||'Untitled project';
@@ -740,47 +765,73 @@ $('#dl').onclick=()=>{
   const m={ai:['handoff.md','text/markdown'],html:['wireframe.html','text/html'],spec:['spec.txt','text/plain']}[X];
   saveFile(pf(m[0]),new Blob([$('#out').value],{type:m[1]+';charset=utf-8'}));
 };
-const homeN=()=>data.screens.find(s=>slug(s.label)==='home'),aboutN=()=>data.screens.find(s=>slug(s.label)==='about');
-const hn=()=>homeN()?all(homeN()):[],an=()=>aboutN()?all(aboutN()):[];
-function addTo(label,txt){
-  const L=ta.value.replace(/\s+$/,'').split('\n'),n=tops().find(s=>slug(s.label)===slug(label));
-  if(!n){setText((L.join('\n')?L.join('\n')+'\n\n':'')+'screen "'+label+'"\n'+(txt?txt+'\n':''));return}
-  L.splice(maxLine(n),0,...(txt?txt.split('\n'):[]));setText(L.join('\n')+'\n');
+const homeN=()=>data.screens.find(s=>slug(s.label)==='home'),aboutN=()=>data.screens.find(s=>slug(s.label)==='about'),compN=()=>data.comps.find(c=>slug(c.label)==='site-nav');
+const hn=()=>homeN()?all(homeN()):[],an=()=>aboutN()?all(aboutN()):[],cn=()=>compN()?all(compN()):[];
+const fnd=(a,t,re)=>a.find(k=>k.type===t&&re.test(k.label||''));
+const CN={'2:1':['Main','Sidebar'],'3:1':['Main','Sidebar'],'1:2':['Sidebar','Main'],'1:3':['Sidebar','Main'],'1:2:1':['Left sidebar','Main','Right sidebar']};
+function addIn(n,txt){
+  if(!n)return;
+  const L=ta.value.replace(/\s+$/,'').split('\n'),ind=' '.repeat((n.depth+1)*2);
+  L.splice(maxLine(n),0,...txt.split('\n').map(l=>ind+l));setText(L.join('\n')+'\n');
 }
+function mkScreen(label){
+  if(tops().some(s=>slug(s.label)===slug(label)))return;
+  const v=ta.value.replace(/\s+$/,'');setText((v?v+'\n\n':'')+'screen "'+label+'"\n');
+}
+const OL=(...x)=>'<ol>'+x.map(i=>'<li>'+i+'</li>').join('')+'</ol>';
+const S=(t,ui,d,ok,act)=>({t,ui,d,ok,act});
+const IN='Open <b>Inside</b> and choose <b>Screen</b>.';
 const BASIC=[
- {t:'Create a screen',d:'Open <b>Within screen</b>, choose <b>+ Add new screen\u2026</b>, type <b>Home</b> and press <b>Create</b>. Your earlier text is kept: <b>Undo</b> in the Edit box brings it back.',ok:()=>!!homeN(),act:()=>addTo('Home','')},
- {t:'Add a header',d:'In <b>Element</b> choose <b>Section (full-width band)</b>, set <b>Label</b> to Header and press <b>Add element</b>. <b>Inside</b> switches to the new section, so next add a <b>Heading</b> labelled \u201cMy site\u201d.',ok:()=>hn().some(k=>k.type==='section'&&/header/i.test(k.label)&&k.children.some(c=>c.type==='heading')),act:()=>addTo('Home','  section "Header"\n    heading "My site"')},
- {t:'Add a navigation bar with search',d:'Set <b>Inside</b> back to <b>Screen</b>. Add a <b>Nav</b>; <b>Inside</b> switches to it. Add three <b>Link</b> elements (Home, About, Contact) and an <b>Input</b> labelled Search with Extra <b>type=search</b>.',ok:()=>hn().some(k=>k.type==='nav'&&all(k).some(c=>c.type==='input')),act:()=>addTo('Home','  nav\n    link "Home" -> "Home"\n    link "About"\n    link "Contact"\n    input "Search" type=search')},
- {t:'Add main content with a sidebar',d:'Set <b>Inside</b> to <b>Screen</b>, add <b>Columns</b> and choose <b>Main + sidebar (2:1)</b>. Two empty columns appear and <b>Inside</b> moves to the first: add a Heading and a Paragraph there. Then choose the second column in <b>Inside</b> and add a Card.',ok:()=>hn().some(k=>k.type==='columns'&&k.children.length>=2&&k.children.every(c=>c.children.length||c.type==='card')),act:()=>addTo('Home','  columns layout=2:1\n    column\n      heading "Main content"\n      paragraph\n    column\n      card\n        heading "Sidebar"\n        text "Related links go here."')},
- {t:'Add a footer',d:'Set <b>Inside</b> to <b>Screen</b>, add a <b>Section</b> labelled Footer, then add a <b>Text</b> inside it.',ok:()=>hn().some(k=>k.type==='section'&&/footer/i.test(k.label)&&k.children.length),act:()=>addTo('Home','  section "Footer"\n    text "\u00a9 2026 My site"')},
- {t:'Check it on mobile',d:'Use <b>Mobile</b> and <b>Widescreen</b> above the preview to see the columns stack. In <b>Edit</b> mode, click any element to select it, then change its values in the Edit box. You have built a basic page.'}
+ S('Create the Home screen',['#fs','#fns','#fnew'],OL('In the <b>Add</b> box, open <b>Within screen</b> and choose <b>+ Add new screen\u2026</b>.','Type <b>Home</b> in the box that appears.','Press <b>Create</b>.')+'<p>Tip: give <b>every</b> element a label. Labels are how you find elements later in the Inside, Position, Edit and Move into lists. Your earlier text stays available through <b>Undo</b>.</p>',()=>!!homeN(),()=>mkScreen('Home')),
+ S('Add a header section',['#ft','#fl','#fadd'],OL('Open <b>Element</b> and choose <b>Layout \u2192 Section (full-width band)</b>.','In <b>Label</b> type <b>Header</b>.','Press <b>Add element</b>.'),()=>!!fnd(hn(),'section',/^header$/i),()=>addIn(homeN(),'section "Header"')),
+ S('Put a heading in the header',['#ft','#fl','#fadd'],OL('<b>Inside</b> now shows the Header section. Leave it.','Open <b>Element</b> and choose <b>Content \u2192 Heading</b>.','In <b>Label</b> type <b>My site</b>, then press <b>Add element</b>.'),()=>{const h=fnd(hn(),'section',/^header$/i);return !!h&&h.children.some(c=>c.type==='heading')},()=>addIn(fnd(hn(),'section',/^header$/i),'heading "My site"')),
+ S('Add a navigation bar',['#fc','#ft','#fl','#fadd'],OL(IN,'Open <b>Element</b> and choose <b>Special \u2192 Nav</b>.','In <b>Label</b> type <b>Main navigation</b>, then press <b>Add element</b>.'),()=>!!fnd(hn(),'nav',/./),()=>addIn(homeN(),'nav "Main navigation"')),
+ S('Add three links to the navigation',['#ft','#fl','#fto','#fadd'],OL('<b>Inside</b> now shows the navigation. Leave it.','Open <b>Element</b> and choose <b>Actions \u2192 Link</b>.','In <b>Label</b> type <b>Home</b>, set <b>Goes to</b> to <b>Home</b>, then press <b>Add element</b>.','Repeat for <b>About</b> and <b>Contact</b>, leaving Goes to on (none).'),()=>{const n=fnd(hn(),'nav',/./);return !!n&&n.children.filter(c=>c.type==='link').length>=3},()=>{const n=fnd(hn(),'nav',/./);if(!n)return;const c=n.children.filter(k=>k.type==='link').length;addIn(n,['link "Home" -> "Home"','link "About"','link "Contact"'].slice(c).join('\n'))}),
+ S('Add a search box to the navigation',['#ft','#fl','#fly','#fadd'],OL('Open <b>Element</b> and choose <b>Form controls \u2192 Input</b>.','In <b>Label</b> type <b>Search</b>.','Set <b>Type</b> to <b>Search</b>, then press <b>Add element</b>.'),()=>{const n=fnd(hn(),'nav',/./);return !!n&&n.children.some(c=>c.type==='input')},()=>addIn(fnd(hn(),'nav',/./),'input "Search" type=search')),
+ S('Add the main content area',['#fc','#ft','#fl','#fly','#fadd'],OL(IN,'Open <b>Element</b> and choose <b>Layout \u2192 Columns</b>.','In <b>Label</b> type <b>Page content</b>.','Set <b>Layout</b> to <b>Main + sidebar (2:1)</b>, then press <b>Add element</b>.')+'<p>Two columns are created for you, already labelled Main and Sidebar.</p>',()=>hn().some(k=>k.type==='columns'&&k.attrs.layout==='2:1'),()=>addIn(homeN(),'columns "Page content" layout=2:1\n  column "Main"\n  column "Sidebar"')),
+ S('Fill the main column',['#fc','#ft','#fl','#fadd'],OL('<b>Inside</b> now shows the Main column. Leave it.','Add a <b>Content \u2192 Heading</b> with the label <b>Main content</b>.','Then add a <b>Content \u2192 Paragraph (Lorem ipsum)</b>. Its label can stay empty.'),()=>{const m=fnd(hn(),'column',/^main$/i);return !!m&&m.children.some(c=>c.type==='heading')&&m.children.some(c=>c.type==='paragraph')},()=>addIn(fnd(hn(),'column',/^main$/i),'heading "Main content"\nparagraph')),
+ S('Add a card to the sidebar',['#fc','#ft','#fl','#fadd'],OL('Open <b>Inside</b> and choose the <b>Sidebar</b> column.','Open <b>Element</b> and choose <b>Layout \u2192 Card (bordered box)</b>.','In <b>Label</b> type <b>Related links</b>, then press <b>Add element</b>.'),()=>{const c=fnd(hn(),'column',/^sidebar$/i);return !!c&&c.children.some(k=>k.type==='card')},()=>addIn(fnd(hn(),'column',/^sidebar$/i),'card "Related links"')),
+ S('Put text in the card',['#ft','#fl','#fadd'],OL('<b>Inside</b> now shows the card. Leave it.','Open <b>Element</b> and choose <b>Content \u2192 Text</b>.','In <b>Label</b> type <b>Related links go here.</b>, then press <b>Add element</b>.'),()=>{const c=fnd(hn(),'column',/^sidebar$/i),d=c&&c.children.find(k=>k.type==='card');return !!d&&d.children.some(k=>k.type==='text')},()=>{const c=fnd(hn(),'column',/^sidebar$/i);addIn(c&&c.children.find(k=>k.type==='card'),'text "Related links go here."')}),
+ S('Add a footer section',['#fc','#ft','#fl','#fadd'],OL(IN,'Open <b>Element</b> and choose <b>Layout \u2192 Section (full-width band)</b>.','In <b>Label</b> type <b>Footer</b>, then press <b>Add element</b>.'),()=>!!fnd(hn(),'section',/^footer$/i),()=>addIn(homeN(),'section "Footer"')),
+ S('Put text in the footer',['#ft','#fl','#fadd'],OL('<b>Inside</b> now shows the Footer section. Leave it.','Open <b>Element</b> and choose <b>Content \u2192 Text</b>.','In <b>Label</b> type <b>\u00a9 2026 My site</b>, then press <b>Add element</b>.'),()=>{const f=fnd(hn(),'section',/^footer$/i);return !!f&&f.children.some(k=>k.type==='text')},()=>addIn(fnd(hn(),'section',/^footer$/i),'text "\u00a9 2026 My site"')),
+ S('Check it on mobile',['[data-d=mobile]','[data-m=select]'],OL('Above the preview, press <b>Mobile</b>, then <b>Widescreen</b>, and watch the columns stack.','Make sure <b>Edit</b> is selected, click any element in the preview, then change its values in the <b>Edit</b> box and press <b>Apply values</b>.')+'<p>You have built a basic page.</p>')
 ];
 const ADV=[
- {t:'Add a second screen',d:'Add a screen called <b>About</b> the same way as before (<b>Within screen</b> \u2192 <b>+ Add new screen\u2026</b>), then give it a Heading and a Paragraph.',ok:()=>!!aboutN(),act:()=>addTo('About','  heading "About us"\n  paragraph')},
- {t:'Share the navigation',d:'Choose <b>+ Add new shared component\u2026</b> and name it <b>Site nav</b>. It is added to the container you were last working in. Give it a Nav with links to Home and About and a search Input, then add <b>Use shared component</b> to each screen. Delete Home\u2019s own nav in the Edit box.',ok:()=>data.comps.some(c=>slug(c.label)==='site-nav')&&flat().filter(k=>k.type==='use'&&slug(k.label)==='site-nav').length>=2,act:()=>{let t=ta.value.replace(/\s+$/,'');if(/component "Site nav"/.test(t)||!aboutN())return;t=t.replace(/^(screen "(?:Home|About)"\n)/gm,'$1  use "Site nav"\n');setText(t+'\n\ncomponent "Site nav"\n  nav\n    link "Home" -> "Home"\n    link "About" -> "About"\n    input "Search" type=search\n')}},
- {t:'Tabs and a table',d:'On About add <b>Tabs</b> (Extra: items=Team|History|Contact) and a <b>Table</b> (Extra: cols=Name|Role rows=3).',ok:()=>an().some(k=>k.type==='tabs')&&an().some(k=>k.type==='table'),act:()=>addTo('About','  tabs items=Team|History|Contact\n  table "Team" cols=Name|Role rows=3')},
- {t:'A button group and a modal',d:'On About add an <b>Inline group</b> containing a Button, then a <b>Modal</b> with some Text and a Close button.',ok:()=>an().some(k=>k.type==='modal'),act:()=>addTo('About','  inline\n    button "Sign up"\n  modal "Thanks for signing up"\n    text "We will be in touch."\n    button "Close" style=secondary')},
- {t:'Notes and Run mode',d:'Add a <b>Note</b> that describes behaviour, such as \u201cSearch filters the team table\u201d. Then press <b>Run</b> above the preview and click the links to move between screens.',ok:()=>an().some(k=>k.type==='note'),act:()=>addTo('About','  note "Search filters the team table"')},
- {t:'Export',d:'Open the <b>Flow</b> tab to see how the screens connect. On <b>Export</b>, choose a Build target, add reference URLs, then <b>Copy</b> or <b>Download</b> the AI handoff, or save images from under the preview.'}
+ S('Create the About screen',['#fs','#fns','#fnew'],OL('Open <b>Within screen</b> and choose <b>+ Add new screen\u2026</b>.','Type <b>About</b>, then press <b>Create</b>.'),()=>!!aboutN(),()=>mkScreen('About')),
+ S('Add a heading to About',['#ft','#fl','#fadd'],OL('Check that <b>Within screen</b> shows <b>About</b> and <b>Inside</b> shows <b>Screen</b>.','Open <b>Element</b> and choose <b>Content \u2192 Heading</b>.','In <b>Label</b> type <b>About us</b>, then press <b>Add element</b>.'),()=>an().some(k=>k.type==='heading'),()=>addIn(aboutN(),'heading "About us"')),
+ S('Create a shared component',['#fs','#fns','#fnew'],OL('Keep <b>Within screen</b> on <b>About</b> and <b>Inside</b> on <b>Screen</b>.','Open <b>Within screen</b> and choose <b>+ Add new shared component\u2026</b>.','Type <b>Site nav</b>, then press <b>Create</b>.')+'<p>A <b>use</b> of it is added to About for you.</p>',()=>!!compN(),()=>{if(!aboutN())return;addIn(aboutN(),'use "Site nav"');setText(ta.value.replace(/\s+$/,'')+'\n\ncomponent "Site nav"\n')}),
+ S('Add a navigation to the shared component',['#ft','#fl','#fadd'],OL('<b>Within screen</b> now shows <b>Shared component: Site nav</b>. Leave it.','Open <b>Element</b> and choose <b>Special \u2192 Nav</b>.','In <b>Label</b> type <b>Site navigation</b>, then press <b>Add element</b>.'),()=>!!fnd(cn(),'nav',/./),()=>addIn(compN(),'nav "Site navigation"')),
+ S('Add two links to it',['#ft','#fl','#fto','#fadd'],OL('<b>Inside</b> shows the navigation. Leave it.','Add a <b>Actions \u2192 Link</b> with the label <b>Home</b> and <b>Goes to</b> set to <b>Home</b>.','Add another labelled <b>About</b> with <b>Goes to</b> set to <b>About</b>.'),()=>{const n=fnd(cn(),'nav',/./);return !!n&&n.children.filter(c=>c.type==='link'&&c.to).length>=2},()=>{const n=fnd(cn(),'nav',/./);if(!n)return;const c=n.children.filter(k=>k.type==='link').length;addIn(n,['link "Home" -> "Home"','link "About" -> "About"'].slice(c).join('\n'))}),
+ S('Use it on Home as well',['#fs','#fc','#ft','#fls','#fadd'],OL('Open <b>Within screen</b> and choose <b>Home</b>. Set <b>Inside</b> to <b>Screen</b>.','Open <b>Element</b> and choose <b>Reuse and notes \u2192 Use shared component</b>.','Check <b>Shared component</b> says <b>Site nav</b>, then press <b>Add element</b>.'),()=>hn().some(k=>k.type==='use'&&slug(k.label)==='site-nav'),()=>addIn(homeN(),'use "Site nav"')),
+ S('Remove the old navigation from Home',['#fm','#fdel'],OL('In the <b>Edit</b> box, open the first dropdown and choose <b>nav \u201cMain navigation\u201d</b>.','Press <b>Delete</b>.'),()=>!!homeN()&&!hn().some(k=>k.type==='nav'),()=>{const n=fnd(hn(),'nav',/./);if(!n)return;const L=ta.value.split('\n');L.splice(n.line-1,maxLine(n)-n.line+1);setText(L.join('\n'))}),
+ S('Add tabs and a table to About',['#fs','#ft','#fly','#fadd'],OL('Set <b>Within screen</b> to <b>About</b> and <b>Inside</b> to <b>Screen</b>.','Choose <b>Actions \u2192 Tabs</b>, pick a <b>Tabs</b> preset and press <b>Add element</b>.','Choose <b>Content \u2192 Table</b>, give it a label such as <b>Team</b>, pick a <b>Columns</b> preset and press <b>Add element</b>.'),()=>an().some(k=>k.type==='tabs')&&an().some(k=>k.type==='table'),()=>addIn(aboutN(),'tabs items=Team|History|Contact\ntable "Team" cols=Name|Role rows=3')),
+ S('Add a modal',['#fc','#ft','#fl','#fadd'],OL('Set <b>Inside</b> to <b>Screen</b>.','Choose <b>Special \u2192 Modal</b>, label it <b>Thanks for signing up</b> and press <b>Add element</b>.','Then add a <b>Content \u2192 Text</b> inside it with the label <b>We will be in touch.</b>'),()=>{const m=fnd(an(),'modal',/./);return !!m&&m.children.some(k=>k.type==='text')},()=>addIn(aboutN(),'modal "Thanks for signing up"\n  text "We will be in touch."')),
+ S('Add a note',['#ft','#fl','#fadd'],OL('Set <b>Inside</b> to <b>Screen</b>.','Choose <b>Reuse and notes \u2192 Note</b>, type <b>Search filters the team table</b> as the label and press <b>Add element</b>.')+'<p>Notes become requirements in the AI handoff.</p>',()=>an().some(k=>k.type==='note'),()=>addIn(aboutN(),'note "Search filters the team table"')),
+ S('Try Run mode',['[data-m=play]'],OL('Above the preview, press <b>Run</b>.','Click a link or button to move between screens.'),()=>M==='play'),
+ S('Export',['[data-t=exp]'],OL('Open the <b>Flow</b> tab to see how the screens connect.','Open the <b>Export</b> tab, choose a <b>Build target</b> and press <b>Copy</b> or <b>Download</b>.')+'<p>Use <b>Save project</b> at the top to keep your work.</p>',()=>T==='exp')
 ];
-function renderTut(){
+function renderTut(auto){
   const el=$('#tut');
+  $$('.glow').forEach(x=>x.classList.remove('glow'));
   if(!TUT){el.hidden=true;return}
-  const st=TUT.steps[TUT.i],last=TUT.i===TUT.steps.length-1,done=st.ok?st.ok():null;
+  const last=TUT.steps.length-1;
+  if(auto)while(TUT.i<last&&TUT.steps[TUT.i].ok&&TUT.steps[TUT.i].ok()){TUT.msg='\u2713 Done: '+TUT.steps[TUT.i].t;TUT.i++}
+  const st=TUT.steps[TUT.i],isLast=TUT.i===last,done=st.ok?st.ok():null;
+  (st.ui||[]).forEach(q=>{const e=$(q);if(e)(e.closest('label')||e).classList.add('glow')});
   el.hidden=false;
-  el.innerHTML=`<h3>${TUT.name}: step ${TUT.i+1} of ${TUT.steps.length} \u00b7 ${st.t}</h3><p>${st.d}</p>${done===null?'':`<p class="ok">${done?'\u2713 Done':'Not done yet'}</p>`}<div class="bar" style="margin:0"><button class="act" id="tprev"${TUT.i?'':' disabled'}>\u2190 Back</button>${st.act?'<button class="act" id="tdo">Do it for me</button>':''}<button class="act" id="tnext">${last?'Finish':'Next \u2192'}</button>${last&&!TUT.adv?'<button class="act" id="tadv">Start advanced tutorial</button>':''}<button class="act" id="tclose">Close</button></div>`;
+  el.innerHTML=`<h3>${TUT.name}: step ${TUT.i+1} of ${TUT.steps.length} \u00b7 ${st.t}</h3>${TUT.msg?`<p class="ok">${TUT.msg}</p>`:''}<div class="td">${st.d}</div>${done===null?'':`<p class="ok">${done?'\u2713 Done':'Waiting for you to finish this step\u2026 it moves on by itself.'}</p>`}<div class="bar" style="margin:0"><button class="act" id="tprev"${TUT.i?'':' disabled'}>\u2190 Back</button>${st.act?'<button class="act" id="tdo">Do it for me</button>':''}<button class="act" id="tnext">${isLast?'Finish':'Skip step \u2192'}</button>${isLast&&!TUT.adv?'<button class="act" id="tadv">Start advanced tutorial</button>':''}<button class="act" id="tclose">Close</button></div>`;
 }
 $('#tut').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b||!TUT)return;
-  const st=TUT.steps[TUT.i];
+  if(b.id!=='tdo')TUT.msg='';
   if(b.id==='tprev')TUT.i--;
   else if(b.id==='tnext'){if(TUT.i===TUT.steps.length-1)TUT=null;else TUT.i++}
-  else if(b.id==='tdo'){if(!(st.ok&&st.ok()))st.act()}
-  else if(b.id==='tadv')TUT={name:'Advanced tutorial',steps:ADV,i:0,adv:true};
+  else if(b.id==='tdo'){for(let j=0;j<=TUT.i;j++){const x=TUT.steps[j];if(x.act&&!(x.ok&&x.ok()))x.act()}}
+  else if(b.id==='tadv')TUT={name:'Advanced tutorial',steps:ADV,i:0,adv:true,msg:''};
   else if(b.id==='tclose')TUT=null;
   renderTut();
 });
-$('#tutload').onclick=()=>{TUT={name:'Tutorial',steps:BASIC,i:0};setText('')};
+$('#tutload').onclick=()=>{TUT={name:'Tutorial',steps:BASIC,i:0,msg:''};setText('')};
 $('#imgscope').addEventListener('change',()=>{$('#imgdir').hidden=$('#imgscope').value!=='all'});
 ['#aitarget','#aifw','#airef'].forEach(q=>$(q).addEventListener('change',()=>{$('#fwrow').hidden=$('#aitarget').value!=='fw';showExp()}));
 $('#fadd').onclick=()=>{
@@ -790,7 +841,7 @@ $('#fadd').onclick=()=>{
   const to=$('#fto').disabled?'':$('#fto').value,x=extraStr(t);
   const ind=' '.repeat((c.depth+1)*2);
   const txt=[ind+t+(label?` "${label}"`:'')+(to?` -> "${to}"`:'')+(x?' '+x:'')];
-  if(col)extraObj(t).layout.split(':').forEach(()=>txt.push(ind+'  column'));
+  if(col){const ly=extraObj(t).layout;ly.split(':').forEach((_,i)=>txt.push(ind+'  column "'+((CN[ly]||[])[i]||'Column '+(i+1))+'"'))}
   const at=pv==='end'?maxLine(c):+pv-1,L=ta.value.split('\n');
   L.splice(at,0,...txt);setText(L.join('\n'));
   if(col||CONT.has(t)){$('#fc').value=String(at+1+(col?1:0));fillMore()}
@@ -882,6 +933,7 @@ ta.addEventListener('input',()=>{
   if(selB&&d&&(d>0?cl<=selB:cl<selB)){$('#fm').value=String(selB+d);fillTargets()}
 });
 ta.addEventListener('scroll',()=>{$('#hl').scrollTop=ta.scrollTop});
+syncUR();
 refresh();
 </script>
 </body>
